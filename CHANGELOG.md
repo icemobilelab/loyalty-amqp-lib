@@ -1,4 +1,4 @@
-Versioning
+## Versioning
 Given a version number MAJOR.MINOR.PATCH, increment the:
 
 MAJOR version when you make incompatible API changes
@@ -7,4 +7,10 @@ PATCH version when you make backwards-compatible bug fixes
 Additional labels for pre-release and build metadata are available as extensions to the MAJOR.MINOR.PATCH format.
 The versioning rules are described on http://semver.org/
 
-Loyalty AMQP Library Changelog
+## Loyalty AMQP Library Changelog
+
+### 0.0.1
+* Add starting codebase (v1 lib) and commit package-lock.json
+
+### 0.0.0
+* Initial Commit
