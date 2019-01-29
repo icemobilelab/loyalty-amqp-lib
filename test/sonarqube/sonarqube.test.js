@@ -2,7 +2,7 @@
 
 const { expect } = require('chai');
 const pkg = require('./../../package.json');
-const { sonarqube } = require('../../index');
+const { sonarqube } = require('loyalty-commons-v4');
 
 function _sampleConfig() {
     return {

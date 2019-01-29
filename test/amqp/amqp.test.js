@@ -37,8 +37,8 @@ describe('AMQP', () => {
 
         afterEach((done) => {
             Bluebird.resolve()
-                .then(() => queue.stop())
-                .then(() => queue.removeAllListeners())
+                .then(queue.stop)
+                .then(queue.removeAllListeners)
                 .nodeify(done);
         });
 
@@ -193,7 +193,7 @@ describe('AMQP', () => {
                 done();
             });
             queue.start()
-                .then(() => queue.stop());
+                .then(queue.stop);
         });
 
         it('Doesn\'t allow to close a queue that\'s already closed', done => {
@@ -216,8 +216,8 @@ describe('AMQP', () => {
                     host: config.get('amqp.host'),
                     username: config.get('amqp.username'),
                     password: config.get('amqp.password'),
-                    logger,
-                    retry: config.get('amqp.retry')
+                    retry: config.get('amqp.retry'),
+                    logger
                 });
             }
 
@@ -240,9 +240,7 @@ describe('AMQP', () => {
             queue.once('connect', () => {
                 queue.listen(QUEUE_NAME);
             });
-            queue.once('listen', () => {
-                done();
-            });
+            queue.once('listen', done);
             queue.start();
         });
 
@@ -429,9 +427,7 @@ describe('AMQP', () => {
             queue.once('connect', () => {
                 queue.listen(QUEUE_NAME, EXCHANGE_NAME, EXCHANGE_TYPE);
             });
-            queue.once('listen', () => {
-                done();
-            });
+            queue.once('listen', done);
             queue.start();
             exchange.start();
         });
@@ -528,9 +524,7 @@ describe('AMQP', () => {
             queue.once('connect', () => {
                 queue.listen(QUEUE_NAME, EXCHANGE_NAME, EXCHANGE_TYPE, ROUTE);
             });
-            queue.once('listen', () => {
-                done();
-            });
+            queue.once('listen', done);
             queue.start();
             exchange.start();
         });
@@ -583,16 +577,15 @@ describe('AMQP', () => {
         const queue = new Queue({ config, logger });
 
         it('Can start and stop with promises', function (done) {
-            queue.start().then(data => {
-                expect(data).to.be.an('object');
-                return queue.listen(QUEUE_NAME);
-            }).then(data => {
-                expect(data).to.be.an('object');
-                expect(data).to.have.keys('consumerTag');
-                return queue.stop().then(() => {
-                    done();
+            queue.start()
+                .then(data => {
+                    expect(data).to.be.an('object');
+                    return queue.listen(QUEUE_NAME);
+                }).then(data => {
+                    expect(data).to.be.an('object');
+                    expect(data).to.have.keys('consumerTag');
+                    return queue.stop().then(done);
                 });
-            });
         });
     });
 
