@@ -14,7 +14,7 @@ const config = convict({
             doc: 'Log level',
             format: String,
             default: 'debug',
-            env: 'APP_ENV'
+            env: 'LOG_LEVEL'
         }
     },
     amqp: {
