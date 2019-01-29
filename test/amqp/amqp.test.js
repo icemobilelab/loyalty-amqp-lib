@@ -36,12 +36,10 @@ describe('AMQP', () => {
         const queue = new SimpleQueue({ config: config.get(), logger });
 
         afterEach((done) => {
-            console.log('afterEach');
             Bluebird.resolve()
                 .then(() => queue.stop())
                 .then(() => queue.removeAllListeners())
-                .then(() => done())
-                .catch(err => console.log(err));
+                .then(() => done());
         });
 
         it('Retries connection to the AMQP server with maxTries', function (done) {
