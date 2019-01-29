@@ -8,8 +8,6 @@
     "lint": "eslint lib test",
     "unit-test": "nyc mocha --exit test/**/*.test.js",
     "test": "npm run up && npm run lint && nyc mocha --exit test/**/*.test.js && npm run down",
-    "precommit": "npm run lint",
-    "prepush": "npm test",
     "debug": "nodemon --ignore 'test/*' --debug=56745 .",
     "jsdoc": "jsdoc -r lib -R README.md -d doc/jsdoc",
     "sonarqube": "node test/sonarqube/sonarqube",
