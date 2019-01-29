@@ -24,17 +24,15 @@
  * Go back to your browser, wait until the report is processed, and you shall see results in the dashboard.
  */
 
-const { sonarqube } = require('../../index');
+const { sonarqube } = require('loyalty-commons-v4');
+const config = require('./../config');
 const pkg = require('../../package.json');
 
-const SONARQUBE_URL = 'https://sonarcloud.io';
-const SONARQUBE_TOKEN = '8b9ed53b71033ffdef53306df45ee9bf765d8741';
-
 sonarqube.report({
-    serverUrl: SONARQUBE_URL,
-    token: SONARQUBE_TOKEN,
+    serverUrl: config.get('sonarqube.serverUrl'),
+    token: config.get('sonarqube.token'),
     organization: 'icemobilelab',
-    projectKey: pkg.name,
-    projectName: 'Loyalty Commons V4',
+    projectKey: 'loyalty-amqp-lib',
+    projectName: 'Loyalty AMQP Lib',
     projectVersion: pkg.version
 }, () => {});
