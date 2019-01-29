@@ -6,7 +6,7 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 const uuid = require('uuid');
 const { AMQPConsumer, AMQPPublisher } = require('../../index');
-const config = require('./config');
+const config = require('../config');
 const logger = require('../util/mock-logger');
 const Bluebird = require('bluebird');
 
@@ -148,7 +148,7 @@ describe('AMQP', () => {
                         done();
                     });
 
-                    queue.conn.close();
+                    queue.connection.close();
                 });
 
         });
@@ -165,7 +165,7 @@ describe('AMQP', () => {
                         done();
                     });
 
-                    queue.conn.emit('close', thrownError);
+                    queue.connection.emit('close', thrownError);
                 });
         });
 
@@ -178,18 +178,18 @@ describe('AMQP', () => {
                     queue.once('connect', conn => {
                         expect(spy.callCount).to.be.eql(2);
                         expect(conn).to.exist.and.be.an('object');
-                        expect(queue.conn).to.exist.and.be.an('object');
+                        expect(queue.connection).to.exist.and.be.an('object');
                         done();
                     });
 
-                    queue.conn.emit('close', new Error());
+                    queue.connection.emit('close', new Error());
                 });
 
         });
 
         it('Closes an open connection to AMQP', done => {
             queue.once('close', () => {
-                expect(queue.conn).to.be.undefined;
+                expect(queue.connection).to.be.undefined;
                 done();
             });
             queue.start()

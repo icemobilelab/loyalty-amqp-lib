@@ -44,8 +44,33 @@ const config = convict({
                 env: 'AMQP_RETRY_BACKOFF'
             }
         }
+    },
+    sonarqube: {
+        serverUrl: {
+            doc: 'The SonarQube Host',
+            format: 'url',
+            default: 'https://sonarcloud.io',
+            env: 'SONARQUBE_HOST'
+        },
+        token: {
+            doc: 'The SonarQube Token',
+            format: String,
+            default: '3e54ded412f11c98480daf42fe7dfc913fcb7357',
+            env: 'SONARQUBE_TOKEN'
+        },
+        projectKey: {
+            doc: 'The SonarQube Project Key',
+            format: String,
+            default: 'loyalty-amqp-lib',
+            env: 'SONARQUBE_PROJECT_KEY'
+        },
+        projectVersion: {
+            doc: 'The SonarQube Project Version',
+            format: String,
+            default: '0.0.0',
+            env: 'SONARQUBE_PROJECT_VERSION'
+        },
     }
-
 });
 
 module.exports = config;

@@ -1,17 +1,15 @@
 'use strict';
 
-/* global describe, it, before, after, beforeEach, afterEach */
-
 const { expect } = require('chai');
-
+const pkg = require('./../../package.json');
 const { sonarqube } = require('../../index');
 
 function _sampleConfig() {
     return {
-        serverUrl: 'http://sonarqube.example',
-        token: 'testToken123',
-        projectKey: 'exampleKey',
-        projectVersion: '0.1.0'
+        serverUrl: 'https://sonarcloud.io',
+        token: 'testTokenValue',
+        projectKey: 'loyalty-amqp-lib',
+        projectVersion: pkg.version
     };
 }
 
