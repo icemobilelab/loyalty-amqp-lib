@@ -1,11 +1,8 @@
 'use strict';
 
 const logger = ['trace', 'debug', 'info', 'warn', 'error', 'fatal'].reduce((accumulator, item) => {
-    accumulator[item] = function(message, ex) {
-        // Do nothing
-        // console.log(message, ex)
-    };
-    accumulator.child = function(obj, message) {
+    accumulator[item] = function() {};
+    accumulator.child = function() {
         return accumulator;
     };
     return accumulator;

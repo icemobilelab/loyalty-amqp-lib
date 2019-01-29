@@ -45,19 +45,19 @@ const config = convict({
         retry: {
             maxTries: {
                 doc: 'Number of retries',
-                format: int,
+                format: 'int',
                 default: 10,
                 env: 'AMQP_RETRIES'
             },
             interval: {
                 doc: 'Retry interval',
-                format: int,
+                format: 'int',
                 default: 1000,
                 env: 'AMQP_RETRY_INTERVAL'
             },
             backoff: {
                 doc: 'Retry backoff',
-                format: int,
+                format: 'int',
                 default: 2,
                 env: 'AMQP_RETRY_BACKOFF'
             }

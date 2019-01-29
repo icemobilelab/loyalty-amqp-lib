@@ -143,7 +143,7 @@ describe('AMQP', () => {
                 .tap(() => queue.listen(uuid()))
                 .then(() => {
 
-                    queue.once('listen', conn => {
+                    queue.once('listen', () => {
                         expect(listenSpy.callCount).to.be.eql(2);
                         done();
                     });
@@ -160,7 +160,7 @@ describe('AMQP', () => {
             const spy = sandbox.spy(queue, 'emit');
             queue.start()
                 .then(() => {
-                    queue.once('close', err => {
+                    queue.once('close', () => {
                         expect(spy.lastCall.args).to.be.eql(['close', thrownError]);
                         done();
                     });
@@ -364,7 +364,7 @@ describe('AMQP', () => {
                 queue.channel.nack(data, false, false);
             });
 
-            dlq.on('message', (messageString, data) => {
+            dlq.on('message', (messageString) => {
                 expect(messageString).to.be.a('string').and.eql('Dead pidgeon');
                 queue.stop();
                 dlq.stop();
@@ -607,5 +607,3 @@ describe('AMQP', () => {
         });
     });
 });
-
-

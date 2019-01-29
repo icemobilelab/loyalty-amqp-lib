@@ -44,7 +44,7 @@ compose.up({ cwd: __dirname, log: false }).then(() => {
                 console.log(`[${item}] ${message}: ${obj}`); // eslint-disable-line no-console
             }
         };
-        accumulator.child = function(obj, message) {
+        accumulator.child = function() {
             return accumulator;
         };
         return accumulator;
