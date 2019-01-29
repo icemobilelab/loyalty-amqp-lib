@@ -2,12 +2,10 @@
 
 /* global describe, it, before, after, beforeEach, afterEach */
 
-const compose = require('docker-compose');
 const { expect } = require('chai');
 const sinon = require('sinon');
-const { Spinner } = require('cli-spinner');
 const uuid = require('uuid');
-const { AMQP, AMQPPublisher } = require('../../index');
+const { AMQPConsumer, AMQPPublisher } = require('../../index');
 const config = require('./config');
 const logger = require('../util/mock-logger');
 const Bluebird = require('bluebird');
@@ -16,33 +14,13 @@ describe('AMQP', () => {
 
     const sandbox = sinon.createSandbox();
 
-    // Start the docker-compose for tests
-    before(async function() {
-        this.timeout(0);
-        const spinner = new Spinner('Invoking docker-compose... %s');
-        spinner.setSpinnerString(0);
-        spinner.start();
-        await compose.up({ cwd: __dirname, log: false });
-        spinner.stop(true);
-    });
-
-    // Close the HTTP server and the queues, otherwise the process won't ever end; optionally stop docker-compose
-    after(async function () {
-        this.timeout(0);
-        const spinner = new Spinner('Shutting down services... %s');
-        spinner.setSpinnerString(0);
-        spinner.start();
-        await compose.down({ cwd: __dirname, log: false });
-        spinner.stop(true);
-    });
-
     afterEach(() => {
         sandbox.restore();
     });
 
     describe('Starting up and shutting down the queue', () => {
 
-        class SimpleQueue extends AMQP {
+        class SimpleQueue extends AMQPConsumer {
 
             constructor({ config, logger }) {
                 super({
@@ -231,7 +209,7 @@ describe('AMQP', () => {
 
         const QUEUE_NAME = 'test-queue';
 
-        class Queue extends AMQP {
+        class Queue extends AMQPConsumer {
 
             constructor({ config, logger }) {
                 super({
@@ -323,7 +301,7 @@ describe('AMQP', () => {
         const MAIN_QUEUE_NAME = 'dlq-queue-main';
         const DLQ_QUEUE_NAME = 'dlq-queue-dlq';
 
-        class Queue extends AMQP {
+        class Queue extends AMQPConsumer {
 
             constructor({ config, logger }) {
                 super({
@@ -354,7 +332,7 @@ describe('AMQP', () => {
             }
         }
 
-        class DLQueue extends AMQP {
+        class DLQueue extends AMQPConsumer {
 
             constructor({ config, logger }) {
                 super({
@@ -427,7 +405,7 @@ describe('AMQP', () => {
             }
         }
 
-        class Queue extends AMQP {
+        class Queue extends AMQPConsumer {
             constructor({ config, logger }) {
                 super({
                     host: config.get('amqp.host'),
@@ -526,7 +504,7 @@ describe('AMQP', () => {
             }
         }
 
-        class Queue extends AMQP {
+        class Queue extends AMQPConsumer {
             constructor({ config, logger }) {
                 super({
                     host: config.get('amqp.host'),
@@ -581,7 +559,7 @@ describe('AMQP', () => {
 
         const QUEUE_NAME = 'promises-queue';
 
-        class Queue extends AMQP {
+        class Queue extends AMQPConsumer {
 
             constructor({ config, logger }) {
                 super({
@@ -620,7 +598,7 @@ describe('AMQP', () => {
 
     describe('Abstract methods', () => {
 
-        const queue = new AMQP({ config, logger });
+        const queue = new AMQPConsumer({ config, logger });
 
         it('Throws an exception on abstract methods', done => {
             expect(queue.publishMessage).to.throw();
