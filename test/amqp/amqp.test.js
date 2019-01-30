@@ -164,8 +164,12 @@ describe('AMQP', () => {
                         done();
                     });
 
-                    queue.connection.emit('close', thrownError);
-                });
+                    queue.getConnection()
+                        .then(connection => {
+                            connection.emit('close', thrownError);
+                        });
+                })
+                .catch(err => done(err));
         });
 
         it('Reconnects on Connection close event', function (done) {
@@ -177,22 +181,26 @@ describe('AMQP', () => {
                     queue.once('connect', conn => {
                         expect(spy.callCount).to.be.eql(2);
                         expect(conn).to.exist.and.be.an('object');
-                        expect(queue.connection).to.exist.and.be.an('object');
+                        expect(queue._connection).to.exist.and.be.an('object');
                         done();
                     });
 
-                    queue.connection.emit('close', new Error());
-                });
-
+                    queue.getConnection()
+                        .then(connection => {
+                            connection.emit('close', new Error());
+                        });
+                })
+                .catch(err => done(err));
         });
 
         it('Closes an open connection to AMQP', done => {
             queue.once('close', () => {
-                expect(queue.connection).to.be.undefined;
+                expect(queue._connection).to.be.undefined;
                 done();
             });
             queue.start()
-                .then(queue.stop);
+                .then(() => queue.stop())
+                .catch(err => done(err));
         });
 
         it('Doesn\'t allow to close a queue that\'s already closed', done => {
