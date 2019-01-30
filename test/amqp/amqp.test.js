@@ -118,20 +118,19 @@ describe('AMQP', () => {
             const listenSpy = sandbox.spy(queue, 'listen');
 
             queue.start()
-                .tap(() => queue.listen(uuid()))
+                .then(() => queue.listen(uuid()))
                 .then(() => {
-
                     queue.once('listen', () => {
                         expect(listenSpy.callCount).to.be.eql(2);
                         done();
                     });
 
-                    return queue.getChannel()
-                        .then((channel) => {
+                    queue.getChannel()
+                        .then(channel => {
                             channel.emit('close', new Error());
                         });
-                });
-
+                })
+                .catch(err => done(err));
         });
 
         it('Listens again on Connection close event', function (done) {
@@ -140,16 +139,16 @@ describe('AMQP', () => {
             const listenSpy = sandbox.spy(queue, 'listen');
 
             queue.start()
-                .tap(() => queue.listen(uuid()))
+                .then(() => queue.listen(uuid()))
                 .then(() => {
-
                     queue.once('listen', () => {
                         expect(listenSpy.callCount).to.be.eql(2);
                         done();
                     });
 
-                    queue.connection.close();
-                });
+                    queue._connection.close();
+                })
+                .catch(err => done(err));
 
         });
 
