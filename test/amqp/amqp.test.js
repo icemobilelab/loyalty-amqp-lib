@@ -13,6 +13,15 @@ const Bluebird = require('bluebird');
 describe('AMQP', () => {
 
     const sandbox = sinon.createSandbox();
+    function queueOptions(config) {
+        return {
+            host: config.get('amqp.host'),
+            username: config.get('amqp.username'),
+            password: config.get('amqp.password'),
+            retry: config.get('amqp.retry'),
+            logger
+        };
+    }
 
     afterEach(() => {
         sandbox.restore();
@@ -20,26 +29,17 @@ describe('AMQP', () => {
 
     describe('Starting up and shutting down the queue', () => {
 
-        class SimpleQueue extends AMQPConsumer {
-
-            constructor({ config, logger }) {
-                super({
-                    host: config.amqp.host,
-                    username: config.amqp.username,
-                    password: config.amqp.password,
-                    logger,
-                    retry: config.amqp.retry
-                });
-            }
-        }
-
-        const queue = new SimpleQueue({ config: config.get(), logger });
+        let queue = new AMQPConsumer(queueOptions(config));
+        beforeEach(() => {
+            queue = new AMQPConsumer(queueOptions(config));
+        });
 
         afterEach((done) => {
             Bluebird.resolve()
                 .then(() => queue.stop())
                 .then(() => queue.removeAllListeners())
-                .then(() => done());
+                .then(() => done())
+                .catch(err => done(err));
         });
 
         it('Retries connection to the AMQP server with maxTries', function (done) {
@@ -47,7 +47,7 @@ describe('AMQP', () => {
             const amqpConfig = config.get();
             amqpConfig.amqp.host = uuid();
 
-            const faultyQueue = new SimpleQueue({ config: amqpConfig, logger });
+            const faultyQueue = new AMQPConsumer(queueOptions(config));
 
             after((done) => {
                 faultyQueue.stop();
@@ -83,7 +83,7 @@ describe('AMQP', () => {
             amqpConfig.amqp.retry.maxTries = undefined;
             amqpConfig.amqp.maxInterval = 5000;
 
-            const faultyQueue = new SimpleQueue({ config: amqpConfig, logger });
+            const faultyQueue = new AMQPConsumer(queueOptions(config));
 
             after((done) => {
                 faultyQueue.stop();
