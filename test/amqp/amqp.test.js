@@ -313,11 +313,11 @@ describe('AMQP', () => {
                     host: config.get('amqp.host'),
                     username: config.get('amqp.username'),
                     password: config.get('amqp.password'),
-                    logger,
                     retry: config.get('amqp.retry'),
                     durable: true,
                     noAck: false,
-                    deadLetterExchange: DLQ_QUEUE_NAME
+                    deadLetterExchange: DLQ_QUEUE_NAME,
+                    logger
                 });
             }
 
@@ -344,9 +344,9 @@ describe('AMQP', () => {
                     host: config.get('amqp.host'),
                     username: config.get('amqp.username'),
                     password: config.get('amqp.password'),
-                    logger,
                     retry: config.get('amqp.retry'),
-                    durable: true
+                    durable: true,
+                    logger
                 });
             }
 
