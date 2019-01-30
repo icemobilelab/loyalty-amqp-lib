@@ -13,7 +13,7 @@ const config = convict({
         level: {
             doc: 'Log level',
             format: String,
-            default: 'fatal',
+            default: 'error',
             env: 'LOG_LEVEL'
         }
     },
