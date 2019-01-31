@@ -222,54 +222,8 @@ describe('AMQP', () => {
             queue.start();
         });
 
-        it('Publishes a message', function (done) {
-            queue.once('message', message => {
-                expect(message).to.be.eql('hello world');
-                done();
-            });
-            queue.publishMessage('hello world');
-        });
-
-        it('Publishes a lot of messages', function (done) {
-            this.timeout(0);
-            const amount = 1000;
-            queue.on('message', message => {
-                expect(message).to.be.a('string');
-                if (message === `#${amount}`) {
-                    queue.removeAllListeners();
-                    done();
-                }
-            });
-            for (let i = 0; i <= amount; i++) {
-                queue.publishMessage(`#${i}`);
-            }
-        });
-
-        it('Publishes an error message', function (done) {
-            queue.once('message', message => {
-                expect(message).to.be.eql('something went wrong');
-                done();
-            });
-            queue.publishError('something went wrong');
-        });
-
         it('Handles errors when listening to a queue', function (done) {
-            const thrownErr = new Error('no connection present, and not allowed to put in a new one');
-            sandbox.stub(queue, 'getChannel').throws(thrownErr);
-            queue.once('error', err => {
-                expect(err).to.exist;
-                done();
-            });
-            queue.listen('some-other-queue-name');
-        });
-
-        it('Handles errors when publishing a message', function (done) {
-            sandbox.stub(queue, 'getChannel').rejects();
-            queue.once('error', err => {
-                expect(err).to.exist;
-                done();
-            });
-            queue.publishMessage('we expect this to break');
+            done(new Error('TBD'));
         });
     });
 
@@ -277,37 +231,6 @@ describe('AMQP', () => {
 
         const MAIN_QUEUE_NAME = 'dlq-queue-main';
         const DLQ_QUEUE_NAME = 'dlq-queue-dlq';
-
-        class Queue extends AMQPConsumer {
-
-            constructor({ config, logger }) {
-                super({
-                    host: config.get('amqp.host'),
-                    username: config.get('amqp.username'),
-                    password: config.get('amqp.password'),
-                    retry: config.get('amqp.retry'),
-                    durable: true,
-                    noAck: false,
-                    deadLetterExchange: DLQ_QUEUE_NAME,
-                    logger
-                });
-            }
-
-            start() {
-                this.once('connect', () => {
-                    super.listen(`${MAIN_QUEUE_NAME}`);
-                });
-                return super.connect();
-            }
-
-            publishMessage(message) {
-                return this.publish(MAIN_QUEUE_NAME, message);
-            }
-
-            publishError(message) {
-                return this.publish(MAIN_QUEUE_NAME, message);
-            }
-        }
 
         class DLQueue extends AMQPConsumer {
 
@@ -330,7 +253,10 @@ describe('AMQP', () => {
             }
         }
 
-        const queue = new Queue({ config, logger });
+        let queue = new AMQPConsumer(queueOptions(config));
+        beforeEach(() => {
+            queue = new AMQPConsumer(queueOptions(config));
+        });
         const dlq = new DLQueue({ config, logger });
 
         it('Sends dead pidgeons to the dead letter queue', function (done) {
