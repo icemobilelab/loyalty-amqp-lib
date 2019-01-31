@@ -44,7 +44,7 @@
         "no-shadow": 0,
         "no-console": 2,
         "semi": "error",
-        "no-unused-vars": "error"
+        "no-unused-vars": "warn"
     },
     "parserOptions": {
         "ecmaVersion": 2018
