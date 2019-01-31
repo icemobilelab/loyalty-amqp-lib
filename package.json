@@ -7,6 +7,7 @@
     "start": "node .",
     "lint": "eslint lib test config index.js",
     "unit-test": "nyc mocha --exit test/**/*.test.js",
+    "unit-test-watch": "nyc mocha --watch --exit test/**/*.test.js",
     "test": "npm run up && npm run lint && nyc mocha --exit test/**/*.test.js && npm run down",
     "debug": "nodemon --ignore 'test/*' --debug=56745 .",
     "jsdoc": "jsdoc -r lib -R README.md -d doc/jsdoc",
