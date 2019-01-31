@@ -42,12 +42,12 @@ describe('AMQP', () => {
                 .catch(err => done(err));
         });
 
-        it.only('Retries connection to the AMQP server with maxTries', function (done) {
+        it('Retries connection to the AMQP server with maxTries', function (done) {
             this.timeout(30000);
-            const amqpConfig = config.get();
-            amqpConfig.amqp.host = uuid();
+            const amqpConfig = queueOptions(config);
+            amqpConfig.host = uuid();
 
-            const faultyQueue = new AMQPConsumer(amqpConfig.amqp);
+            const faultyQueue = new AMQPConsumer(amqpConfig);
 
             after((done) => {
                 faultyQueue.stop();
