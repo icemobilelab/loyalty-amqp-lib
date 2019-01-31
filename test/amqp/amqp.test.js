@@ -27,7 +27,7 @@ describe('AMQP', () => {
         sandbox.restore();
     });
 
-    describe('Starting up and shutting down the queue', () => {
+    describe.only('Starting up and shutting down the queue', () => {
 
         let queue = new AMQPConsumer(queueOptions(config));
         beforeEach(() => {
@@ -42,12 +42,12 @@ describe('AMQP', () => {
                 .catch(err => done(err));
         });
 
-        it('Retries connection to the AMQP server with maxTries', function (done) {
+        it.only('Retries connection to the AMQP server with maxTries', function (done) {
             this.timeout(30000);
             const amqpConfig = config.get();
             amqpConfig.amqp.host = uuid();
 
-            const faultyQueue = new AMQPConsumer(queueOptions(config));
+            const faultyQueue = new AMQPConsumer(amqpConfig.amqp);
 
             after((done) => {
                 faultyQueue.stop();
