@@ -17,7 +17,7 @@ describe('AMQP', () => {
         sandbox.restore();
     });
 
-    describe.only('Starting up and shutting down the queue', () => {
+    describe('Starting up and shutting down the queue', () => {
 
         function queueOptions(config) {
             return {
@@ -72,7 +72,14 @@ describe('AMQP', () => {
             setTimeout(() => {
                 expect(errored.code, 'Should throw ENOTFOUND error').to.equal('ENOTFOUND');
                 done();
-            }, (config.get('amqp.retry.interval') * Math.pow(config.get('amqp.retry.backoff'), config.get('amqp.retry.maxTries')) + 500)); // eslint-disable-line
+            }, (
+                    config.get('amqp.retry.interval')
+                    * Math.pow(
+                        config.get('amqp.retry.backoff'),
+                        config.get('amqp.retry.maxTries')
+                    ) + 500
+                )
+            );
         });
 
         it('Retries connection indefinitely to the AMQP server without maxTries', function (done) {
@@ -111,7 +118,7 @@ describe('AMQP', () => {
             }, (config.get('amqp.retry.interval') * Math.pow(config.get('amqp.retry.backoff'), config.get('amqp.retry.maxTries')) + 1500)); // eslint-disable-line
         });
 
-        it.only('Listens again on Channel close event', function (done) {
+        it('Listens again on Channel close event', function (done) {
             this.timeout(2000);
 
             queue.start()
@@ -153,8 +160,8 @@ describe('AMQP', () => {
             const thrownError = new Error('unexpected error');
             queue.start()
                 .then(() => {
-                    queue.once('close', err => {
-                        expect(['close', err]).to.be.eql(['close', thrownError]);
+                    queue.once('reconnect', err => {
+                        expect(err).to.be.eql(thrownError);
                         done();
                     });
 
