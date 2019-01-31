@@ -13,15 +13,6 @@ const Bluebird = require('bluebird');
 describe('AMQP', () => {
 
     const sandbox = sinon.createSandbox();
-    function queueOptions(config) {
-        return {
-            host: config.get('amqp.host'),
-            username: config.get('amqp.username'),
-            password: config.get('amqp.password'),
-            retry: config.get('amqp.retry'),
-            logger
-        };
-    }
 
     afterEach(() => {
         sandbox.restore();
@@ -29,6 +20,15 @@ describe('AMQP', () => {
 
     describe('Starting up and shutting down the queue', () => {
 
+        function queueOptions(config) {
+            return {
+                host: config.get('amqp.host'),
+                username: config.get('amqp.username'),
+                password: config.get('amqp.password'),
+                retry: config.get('amqp.retry'),
+                logger
+            };
+        }
         let queue = new AMQPConsumer(queueOptions(config));
         beforeEach(() => {
             queue = new AMQPConsumer(queueOptions(config));
@@ -44,10 +44,10 @@ describe('AMQP', () => {
 
         it('Retries connection to the AMQP server with maxTries', function (done) {
             this.timeout(30000);
-            const amqpConfig = config.get();
-            amqpConfig.amqp.host = uuid();
+            const amqpConfig = queueOptions(config);
+            amqpConfig.host = uuid();
 
-            const faultyQueue = new AMQPConsumer(queueOptions(config));
+            const faultyQueue = new AMQPConsumer(amqpConfig);
 
             after((done) => {
                 faultyQueue.stop();
@@ -78,12 +78,12 @@ describe('AMQP', () => {
 
         it('Retries connection indefinitely to the AMQP server without maxTries', function (done) {
             this.timeout(30000);
-            const amqpConfig = config.get();
-            amqpConfig.amqp.host = uuid();
-            amqpConfig.amqp.retry.maxTries = undefined;
-            amqpConfig.amqp.maxInterval = 5000;
+            const amqpConfig = queueOptions(config);
+            amqpConfig.host = uuid();
+            amqpConfig.retry.maxTries = undefined;
+            amqpConfig.maxInterval = 5000;
 
-            const faultyQueue = new AMQPConsumer(queueOptions(config));
+            const faultyQueue = new AMQPConsumer(amqpConfig);
 
             after((done) => {
                 faultyQueue.stop();
