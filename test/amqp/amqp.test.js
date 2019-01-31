@@ -139,7 +139,14 @@ describe('AMQP', () => {
                         done();
                     });
 
+<<<<<<< HEAD
                     queue._connection.emit('close', new Error('yay'));
+=======
+                    queue._getConnection()
+                        .then(conn => {
+                            conn.emit('close', new Error('test'));
+                        });
+>>>>>>> 1dbdfdd160bc712b8f17a1d2dcf70d61cdbc33dc
                 })
                 .catch(err => done(err));
 
