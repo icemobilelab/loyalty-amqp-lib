@@ -154,14 +154,13 @@ describe('AMQP', () => {
                 .catch(err => done(err));
         });
 
-        it('Triggers a close event when the connection is lost', function (done) {
+        it('Triggers a reconnect event when the connection is lost', function (done) {
             this.timeout(2000);
 
             const thrownError = new Error('unexpected error');
             queue.start()
                 .then(() => {
-                    queue.once('reconnect', err => {
-                        expect(err).to.be.eql(thrownError);
+                    queue.once('reconnect', () => {
                         done();
                     });
 
@@ -202,14 +201,6 @@ describe('AMQP', () => {
             queue.start()
                 .then(() => queue.stop())
                 .catch(err => done(err));
-        });
-
-        it('Doesn\'t allow to close a queue that\'s already closed', done => {
-            queue.once('close', () => {
-                done(new Error('This queue should not emit the event "close"'));
-            });
-            queue.stop();
-            setTimeout(done, 1000);
         });
     });
 
