@@ -18,7 +18,7 @@ describe('AMQP', () => {
         sandbox.restore();
     });
 
-    describe.only('Starting up and shutting down the queue', () => {
+    describe('Starting up and shutting down the queue', () => {
 
         function queueOptions(config) {
             return {
@@ -156,15 +156,14 @@ describe('AMQP', () => {
             this.timeout(2000);
 
             const thrownError = new Error('unexpected error');
-            const spy = sandbox.spy(queue, 'emit');
             queue.start()
                 .then(() => {
-                    queue.once('close', () => {
-                        expect(spy.lastCall.args).to.be.eql(['close', thrownError]);
+                    queue.once('close', err => {
+                        expect(['close', err]).to.be.eql(['close', thrownError]);
                         done();
                     });
 
-                    queue.getConnection()
+                    queue._getConnection()
                         .then(connection => {
                             connection.emit('close', thrownError);
                         });
@@ -185,7 +184,7 @@ describe('AMQP', () => {
                         done();
                     });
 
-                    queue.getConnection()
+                    queue._getConnection()
                         .then(connection => {
                             connection.emit('close', new Error());
                         });
@@ -195,7 +194,7 @@ describe('AMQP', () => {
 
         it('Closes an open connection to AMQP', done => {
             queue.once('close', () => {
-                expect(queue._connection).to.be.undefined;
+                expect(queue._channel).to.be.undefined;
                 done();
             });
             queue.start()
@@ -366,7 +365,7 @@ describe('AMQP', () => {
             this.timeout(0);
 
             queue.on('message', (messageString, data) => {
-                queue.channel.nack(data, false, false);
+                queue._channel.nack(data, false, false);
             });
 
             dlq.on('message', (messageString) => {
