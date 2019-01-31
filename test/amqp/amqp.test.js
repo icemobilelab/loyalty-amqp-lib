@@ -8,7 +8,6 @@ const uuid = require('uuid');
 const { AMQPConsumer, AMQPPublisher } = require('../../index');
 const config = require('../config');
 const logger = require('../util/mock-logger');
-const Bluebird = require('bluebird');
 
 describe('AMQP', () => {
 
@@ -18,7 +17,7 @@ describe('AMQP', () => {
         sandbox.restore();
     });
 
-    describe('Starting up and shutting down the queue', () => {
+    describe.only('Starting up and shutting down the queue', () => {
 
         function queueOptions(config) {
             return {
@@ -35,7 +34,7 @@ describe('AMQP', () => {
         });
 
         afterEach((done) => {
-            Bluebird.resolve()
+            Promise.resolve()
                 .then(() => queue.stop())
                 .then(() => queue.removeAllListeners())
                 .then(() => done())
@@ -112,16 +111,13 @@ describe('AMQP', () => {
             }, (config.get('amqp.retry.interval') * Math.pow(config.get('amqp.retry.backoff'), config.get('amqp.retry.maxTries')) + 1500)); // eslint-disable-line
         });
 
-        it('Listens again on Channel close event', function (done) {
+        it.only('Listens again on Channel close event', function (done) {
             this.timeout(2000);
-
-            const listenSpy = sandbox.spy(queue, 'listen');
 
             queue.start()
                 .then(() => queue.listen(uuid()))
                 .then(() => {
-                    queue.once('listen', () => {
-                        expect(listenSpy.callCount).to.be.eql(2);
+                    queue.once('reconnect', () => {
                         done();
                     });
 
@@ -136,17 +132,14 @@ describe('AMQP', () => {
         it('Listens again on Connection close event', function (done) {
             this.timeout(2000);
 
-            const listenSpy = sandbox.spy(queue, 'listen');
-
             queue.start()
                 .then(() => queue.listen(uuid()))
                 .then(() => {
-                    queue.once('listen', () => {
-                        expect(listenSpy.callCount).to.be.eql(2);
+                    queue.once('reconnect', () => {
                         done();
                     });
 
-                    queue._connection.close();
+                    queue._connection.emit('close', new Error('yay'));
                 })
                 .catch(err => done(err));
 
