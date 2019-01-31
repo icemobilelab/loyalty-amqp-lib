@@ -9,6 +9,15 @@ const { AMQPConsumer, AMQPPublisher } = require('../../index');
 const config = require('../config');
 const logger = require('../util/mock-logger');
 
+function queueOptions(config) {
+    return {
+        host: config.get('amqp.host'),
+        username: config.get('amqp.username'),
+        password: config.get('amqp.password'),
+        retry: config.get('amqp.retry'),
+        logger
+    };
+}
 describe('AMQP', () => {
 
     const sandbox = sinon.createSandbox();
@@ -19,15 +28,6 @@ describe('AMQP', () => {
 
     describe('Starting up and shutting down the queue', () => {
 
-        function queueOptions(config) {
-            return {
-                host: config.get('amqp.host'),
-                username: config.get('amqp.username'),
-                password: config.get('amqp.password'),
-                retry: config.get('amqp.retry'),
-                logger
-            };
-        }
         let queue = new AMQPConsumer(queueOptions(config));
         beforeEach(() => {
             queue = new AMQPConsumer(queueOptions(config));
@@ -208,28 +208,7 @@ describe('AMQP', () => {
 
         const QUEUE_NAME = 'test-queue';
 
-        class Queue extends AMQPConsumer {
-
-            constructor({ config, logger }) {
-                super({
-                    host: config.get('amqp.host'),
-                    username: config.get('amqp.username'),
-                    password: config.get('amqp.password'),
-                    retry: config.get('amqp.retry'),
-                    logger
-                });
-            }
-
-            publishMessage(message) {
-                return this.publish(QUEUE_NAME, message);
-            }
-
-            publishError(message) {
-                return this.publish(QUEUE_NAME, message);
-            }
-        }
-
-        const queue = new Queue({ config, logger });
+        let queue = new AMQPConsumer(queueOptions(config));
 
         after(() => {
             queue.stop();
@@ -275,7 +254,8 @@ describe('AMQP', () => {
         });
 
         it('Handles errors when listening to a queue', function (done) {
-            sandbox.stub(queue, 'getChannel').rejects();
+            const thrownErr = new Error('no connection present, and not allowed to put in a new one');
+            sandbox.stub(queue, 'getChannel').throws(thrownErr);
             queue.once('error', err => {
                 expect(err).to.exist;
                 done();
