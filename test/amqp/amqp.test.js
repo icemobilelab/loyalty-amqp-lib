@@ -273,11 +273,6 @@ describe('AMQP', () => {
         const exchange = new AMQPPublisher( queueOptions(config) );
         const queue = new AMQPConsumer( queueOptions(config) );
 
-        before(async () => {
-            await exchange.start();
-            await queue.start();
-        });
-
         after(async () => {
             await exchange.stop();
             await queue.stop();
@@ -289,10 +284,24 @@ describe('AMQP', () => {
             exchange.start();
         });
 
-        it('Publishes a message to a exchange', function (done) {
+        it.only('Listens to message events', function (done) {
             this.timeout(10000);
 
             const msg = 'hello world';
+            queue.start();
+            queue.once('message', message => {
+                expect(message).to.be.eql(msg);
+                done();
+            });
+            queue.emit('message', msg);
+        });
+
+        it('Publishes a message to an exchange', function (done) {
+            this.timeout(10000);
+
+            const msg = 'hello world';
+            queue.start();
+            exchange.start();
             queue.once('message', message => {
                 expect(message).to.be.eql(msg);
                 done();
