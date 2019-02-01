@@ -10,6 +10,7 @@ const logger = require('../util/mock-logger');
 
 function queueOptions(config) {
     return {
+        // serviceName: `amqp-${new Date().toISOString()}`,
         host: config.get('amqp.host'),
         username: config.get('amqp.username'),
         password: config.get('amqp.password'),
@@ -206,8 +207,6 @@ describe('AMQP', () => {
 
     describe('Listening and publishing on queue', () => {
 
-        const QUEUE_NAME = 'test-queue';
-
         let queue = new AMQPConsumer(queueOptions(config));
 
         after(() => {
@@ -216,7 +215,7 @@ describe('AMQP', () => {
 
         it('Connects and listens to a queue', function (done) {
             queue.once('connect', () => {
-                queue.listen(QUEUE_NAME);
+                queue.listen();
             });
             queue.once('listen', done);
             queue.start();
@@ -266,27 +265,29 @@ describe('AMQP', () => {
 
     describe('Listening on queue and publishing on exchange', () => {
 
-        const EXCHANGE_NAME = 'test-exchange';
-        const EXCHANGE_TYPE = 'topic';
-        const QUEUE_NAME = 'test-queue';
-
         const exchange = new AMQPPublisher( queueOptions(config) );
         const queue = new AMQPConsumer( queueOptions(config) );
 
-        after(async () => {
-            await exchange.stop();
-            await queue.stop();
-        });
+        // after(async () => {
+        //     await exchange.stop()
+        //         .catch(err => {
+        //             logger.error({ err }, 'Failed to stop publisher');
+        //             throw err;
+        //         });
+        //     await queue.stop()
+        //         .catch(err => {
+        //             logger.error({ err }, 'Failed to stop consumer');
+        //             throw err;
+        //         });
+        // });
 
-        it('Connects and listens to a queue (and start exchange)', function (done) {
+        it.only('Connects and listens to a queue (and start exchange)', function (done) {
             queue.once('listen', done);
             queue.start();
             exchange.start();
         });
 
         it.only('Listens to message events', function (done) {
-            this.timeout(10000);
-
             const msg = 'hello world';
             queue.start();
             queue.once('message', message => {
@@ -296,31 +297,38 @@ describe('AMQP', () => {
             queue.emit('message', msg);
         });
 
-        it('Publishes a message to an exchange', function (done) {
+        it.only('Publishes a message to an exchange', async function (done) {
             this.timeout(10000);
 
             const msg = 'hello world';
-            queue.start();
-            exchange.start();
+            await queue.start();
+            await exchange.start();
             queue.once('message', message => {
+                console.log('received message:', message);
                 expect(message).to.be.eql(msg);
                 done();
             });
-            exchange.publish(msg);
+            await exchange.publish(msg);
         });
 
-        it('Publishes a lot of messages', function (done) {
-            this.timeout(0);
+        it('Publishes a lot of messages', async function (done) {
+            this.timeout(10000);
+
             const amount = 1000;
+            await queue.start();
             queue.on('message', message => {
+                console.log('Received message:', message);
                 expect(message).to.be.a('string');
                 if (message === `#${amount}`) {
+                    console.log('Finished');
                     queue.removeAllListeners();
                     done();
                 }
             });
+
+            await exchange.start();
             for (let i = 0; i <= amount; i++) {
-                exchange.publish(`#${i}`);
+                await exchange.publish(`#${i}`);
             }
         });
 
@@ -414,56 +422,5 @@ describe('AMQP', () => {
             exchange.publishMessage('hello world', ROUTE);
         });
 
-    });
-
-    describe('Promises', () => {
-
-        const QUEUE_NAME = 'promises-queue';
-
-        class Queue extends AMQPConsumer {
-
-            constructor({ config, logger }) {
-                super({
-                    host: config.get('amqp.host'),
-                    username: config.get('amqp.username'),
-                    password: config.get('amqp.password'),
-                    logger,
-                    retry: config.get('amqp.retry')
-                });
-            }
-
-            publishMessage(message) {
-                return this.publish(QUEUE_NAME, message);
-            }
-
-            publishError(message) {
-                return this.publish(QUEUE_NAME, message);
-            }
-        }
-
-        const queue = new Queue({ config, logger });
-
-        it('Can start and stop with promises', function (done) {
-            queue.start()
-                .then(data => {
-                    expect(data).to.be.an('object');
-                    return queue.listen(QUEUE_NAME);
-                }).then(data => {
-                    expect(data).to.be.an('object');
-                    expect(data).to.have.keys('consumerTag');
-                    return queue.stop().then(done);
-                });
-        });
-    });
-
-    describe('Abstract methods', () => {
-
-        const queue = new AMQPConsumer({ config, logger });
-
-        it('Throws an exception on abstract methods', done => {
-            expect(queue.publishMessage).to.throw();
-            expect(queue.publishError).to.throw();
-            done();
-        });
     });
 });
