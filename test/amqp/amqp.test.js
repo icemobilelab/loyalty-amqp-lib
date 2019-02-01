@@ -1,11 +1,10 @@
 'use strict';
 
-/* global describe, it, before, after, beforeEach, afterEach */
-
 const { expect } = require('chai');
 const sinon = require('sinon');
 const uuid = require('uuid');
-const { AMQPConsumer, AMQPPublisher } = require('../../index');
+const rewire = require('rewire');
+const { AMQPConsumer, AMQPPublisher } = rewire('../../index');
 const config = require('../config');
 const logger = require('../util/mock-logger');
 
@@ -18,6 +17,7 @@ function queueOptions(config) {
         logger
     };
 }
+
 describe('AMQP', () => {
 
     const sandbox = sinon.createSandbox();
@@ -229,38 +229,19 @@ describe('AMQP', () => {
 
     describe('Dead letter queue', () => {
 
-        const MAIN_QUEUE_NAME = 'dlq-queue-main';
-        const DLQ_QUEUE_NAME = 'dlq-queue-dlq';
-
-        class DLQueue extends AMQPConsumer {
-
-            constructor({ config, logger }) {
-                super({
-                    host: config.get('amqp.host'),
-                    username: config.get('amqp.username'),
-                    password: config.get('amqp.password'),
-                    retry: config.get('amqp.retry'),
-                    durable: true,
-                    logger
-                });
-            }
-
-            start() {
-                this.once('connect', () => {
-                    super.listen(`${DLQ_QUEUE_NAME}.queue`);
-                });
-                return super.connect();
-            }
-        }
-
-        let queue = new AMQPConsumer(queueOptions(config));
+        let queue;
+        let dlq;
         beforeEach(() => {
-            queue = new AMQPConsumer(queueOptions(config));
+            queue = new AMQPPublisher(queueOptions(config));
+            dlq = new AMQPConsumer(queueOptions(config));
+
+            // have queue publish to listener. listener nacks -> msg goes to dlq
+            // queue.__set__('')
+            // rewire dlq so internal deadletter points to dlq
+            dlq.__set__('exchange', 'dlq');
         });
-        const dlq = new DLQueue({ config, logger });
 
         it('Sends dead pidgeons to the dead letter queue', function (done) {
-
             this.timeout(0);
 
             queue.on('message', (messageString, data) => {
@@ -276,7 +257,7 @@ describe('AMQP', () => {
 
             queue.start().then(() => {
                 dlq.start().then(() => {
-                    queue.publishMessage('Dead pidgeon');
+                    queue.publish('Dead pidgeon');
                 });
             });
 
@@ -289,60 +270,34 @@ describe('AMQP', () => {
         const EXCHANGE_TYPE = 'topic';
         const QUEUE_NAME = 'test-queue';
 
-        class Exchange extends AMQPPublisher {
-            constructor({ config, logger }) {
-                super({
-                    host: config.get('amqp.host'),
-                    username: config.get('amqp.username'),
-                    password: config.get('amqp.password'),
-                    logger,
-                    retry: config.get('amqp.retry')
-                });
-            }
+        const exchange = new AMQPPublisher( queueOptions(config) );
+        const queue = new AMQPConsumer( queueOptions(config) );
 
-            publishMessage(message, route = '') {
-                return this.publish(EXCHANGE_NAME, message, route);
-            }
-            publishError(message) {
-                return this.publish(EXCHANGE_NAME, message);
-            }
-        }
+        before(async () => {
+            await exchange.start();
+            await queue.start();
+        });
 
-        class Queue extends AMQPConsumer {
-            constructor({ config, logger }) {
-                super({
-                    host: config.get('amqp.host'),
-                    username: config.get('amqp.username'),
-                    password: config.get('amqp.password'),
-                    logger,
-                    retry: config.get('amqp.retry')
-                });
-            }
-        }
-
-        const exchange = new Exchange({ config, logger });
-        const queue = new Queue({ config, logger });
-
-        after(() => {
-            exchange.stop();
-            queue.stop();
+        after(async () => {
+            await exchange.stop();
+            await queue.stop();
         });
 
         it('Connects and listens to a queue (and start exchange)', function (done) {
-            queue.once('connect', () => {
-                queue.listen(QUEUE_NAME, EXCHANGE_NAME, EXCHANGE_TYPE);
-            });
             queue.once('listen', done);
             queue.start();
             exchange.start();
         });
 
         it('Publishes a message to a exchange', function (done) {
+            this.timeout(10000);
+
+            const msg = 'hello world';
             queue.once('message', message => {
-                expect(message).to.be.eql('hello world');
+                expect(message).to.be.eql(msg);
                 done();
             });
-            exchange.publishMessage('hello world');
+            exchange.publish(msg);
         });
 
         it('Publishes a lot of messages', function (done) {
@@ -356,7 +311,7 @@ describe('AMQP', () => {
                 }
             });
             for (let i = 0; i <= amount; i++) {
-                exchange.publishMessage(`#${i}`);
+                exchange.publish(`#${i}`);
             }
         });
 
@@ -365,7 +320,7 @@ describe('AMQP', () => {
                 expect(message).to.be.eql('something went wrong');
                 done();
             });
-            exchange.publishError('something went wrong');
+            exchange.publish('something went wrong');
         });
 
         it('Handles errors when publishing a message', function (done) {
@@ -374,10 +329,9 @@ describe('AMQP', () => {
                 expect(err).to.exist;
                 done();
             });
-            exchange.publishMessage('we expect this to break');
+            exchange.publish('we expect this to break');
         });
     });
-
 
     describe('Listening on queue and publishing on exchange with routes', () => {
 
@@ -452,7 +406,6 @@ describe('AMQP', () => {
         });
 
     });
-
 
     describe('Promises', () => {
 
