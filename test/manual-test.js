@@ -20,7 +20,7 @@ const _ = require('lodash');
 const compose = require('docker-compose');
 const { Spinner } = require('cli-spinner');
 
-const { AMQP } = require('../../index');
+const { AMQP } = require('../index');
 const config = require('./config');
 
 const spinner = new Spinner('Invoking docker-compose... %s');
