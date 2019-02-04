@@ -10,6 +10,7 @@ describe('Dead letter queue', () => {
 
     let queue;
     let dlq;
+
     beforeEach(() => {
         queue = new AMQPPublisher(queueOptions(config));
         dlq = new AMQPConsumer(queueOptions(config));
@@ -20,7 +21,7 @@ describe('Dead letter queue', () => {
         dlq.__set__('exchange', 'dlq');
     });
 
-    it('Sends nonacknowledged messages to the dead letter queue', function (done) {
+    it('Sends nonacknowledged messages to the dead letter queue', async function (done) {
         this.timeout(0);
 
         const msg = 'Dead pigeon';
@@ -35,11 +36,9 @@ describe('Dead letter queue', () => {
             done();
         });
 
-        queue.start().then(() => {
-            dlq.start().then(() => {
-                queue.publish(msg);
-            });
-        });
+        await queue.start();
+        await dlq.start();
+        queue.publish(msg);
 
     });
 });

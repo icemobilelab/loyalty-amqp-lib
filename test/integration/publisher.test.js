@@ -9,8 +9,8 @@ const queueOptions = require('../util/constructor');
 
 describe('Publishing to an exchange', () => {
 
-    const producer = new AMQPPublisher( queueOptions(config) );
-    const consumer = new AMQPConsumer( queueOptions(config) );
+    const producer = new AMQPPublisher(queueOptions(config));
+    const consumer = new AMQPConsumer(queueOptions(config));
 
     it('Publishes a message to an exchange', async function (done) {
         this.timeout(10000);
