@@ -72,17 +72,22 @@ describe('_setConnection', () => {
         const testValue = 'test';
         const base = new AMQP.AMQP(constructor(config));
         console.log('[_setConnection:test] base._connection:', base._connection);
+        base._connection = 'test';
+        console.log('[_setConnection:test] base._connection:', base._connection);
         _setConnection(base, testValue);
-        // base._connection = testValue;
         console.log('[_setConnection:test] base._connection:', base._connection);
         expect(base._connection).to.be.eql(testValue);
-
     });
     it('Successfully sets a connection to undefined', function () {
         this.timeout(2000);
-        const base = new AMQP.AMQP(constructor(config));
 
-        const res = _setConnection(base);
-        return res;
+        const testValue = undefined;
+        const base = new AMQP.AMQP(constructor(config));
+        console.log('[_setConnection:test] base._connection:', base._connection);
+        base._connection = 'incorrect_value';
+        console.log('[_setConnection:test] base._connection:', base._connection);
+        _setConnection(base, testValue);
+        console.log('[_setConnection:test] base._connection:', base._connection);
+        expect(base._connection).to.be.eql(testValue);
     });
 });
