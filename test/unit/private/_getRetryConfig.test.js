@@ -2,13 +2,13 @@
 
 const { expect } = require('chai');
 const rewire = require('rewire');
-const AMQPBase = rewire('../../lib/amqp-base');
+const AMQPBase = rewire('../../../lib/amqp-base');
 const { EventEmitter } = require('events');
 
 
-describe('base -- getRetryConfig()', () => {
+describe('_getRetryConfig()', () => {
 
-    const getRetryConfig = AMQPBase.__get__('getRetryConfig');
+    const getRetryConfig = AMQPBase.__get__('_getRetryConfig');
 
     it('When not passed, max_tries should be set to -1', function (done) {
         expect(getRetryConfig().max_tries).to.equal(-1);
