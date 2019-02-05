@@ -11,12 +11,11 @@ describe('_getConnection', () => {
 
     async function _getConnection(base) {
         const inner = AMQP.__get__('_getConnection');
-        const res = await inner(base);
-        return res;
+        return await inner(base);
     }
 
     AMQP.__set__('_connect', async (instance) => {
-        base._connection = new EventEmitter();
+        instance._connection = new EventEmitter();
     });
 
     let base = new AMQP.AMQP(constructor(config));
