@@ -9,21 +9,19 @@ const constructor = require('../../util/constructor');
 
 describe('_connect', () => {
 
-    const _connect = AMQP.__get__('_connect');
     const connection = new EventEmitter();
-    const mitty = new EventEmitter();
-
     AMQP.__set__('_createConnection', () => {
         return Promise.resolve(connection);
     });
-    AMQP.__set__('_connectionCloseHandler', () => {
-        mitty.emit('handledClose');
-    });
+    const _connect = AMQP.__get__('_connect');
 
     let base;
     beforeEach(function () {
-        this.timeout(2000);
         base = new AMQP.AMQP(constructor(config));
+    });
+    afterEach(function () {
+        connection.removeAllListeners();
+        base.removeAllListeners();
     });
 
     it('Successfully connects', async function () {
@@ -42,19 +40,22 @@ describe('_connect', () => {
     });
 
     it('Emits disconnect event', function (done) {
-        this.timeout(2000);
         base.once('disconnect', done);
         _connect(base)
             .then((conn) => {
-                conn.emit('close');
+                conn.emit('close', new Error);
             });
     });
 
     it('Calls close handler on connection close', function (done) {
-        mitty.once('handledClose', done);
+        const error = new Error('test error');
+        AMQP.__set__('_connectionCloseHandler', (base, err) => {
+            expect(err).to.be.eql(error);
+            done();
+        });
         _connect(base)
             .then((conn) => {
-                conn.emit('close');
+                conn.emit('close', error);
             });
     });
 });
