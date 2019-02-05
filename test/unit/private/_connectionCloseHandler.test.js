@@ -14,22 +14,20 @@ describe('_connectionCloseHandler', () => {
     const err = new Error('yikes');
 
     it('expect disconnect event to be emitted on base when error is passed', (done) => {
-        const emitCallback = sinon.fake();
-        const base = { emit: emitCallback, logger: mockLogger };
+        const base = { emit: sinon.fake(), logger: mockLogger };
         _connectionCloseHandler(base, err);
-        expect(emitCallback.callCount).to.equal(1);
-        expect(emitCallback.getCall(0).args[0]).to.equal('disconnect');
+        expect(base.emit.callCount).to.equal(1);
+        expect(base.emit.getCall(0).args[0]).to.equal('disconnect');
         done();
 
     });
 
     it('expect to reconnect on close when error is passed', (done) => {
-        const emitCallback = sinon.fake();
         const connectCallback = sinon.fake.resolves('mock-mock');
         AMQP.__set__('_connect', connectCallback);
-        const base = { emit: emitCallback, logger: mockLogger };
+        const base = { emit: sinon.fake(), logger: mockLogger };
         _connectionCloseHandler(base, err);
-        expect(emitCallback.callCount).to.equal(1);
+        expect(base.emit.callCount).to.equal(1);
         done();
     });
 

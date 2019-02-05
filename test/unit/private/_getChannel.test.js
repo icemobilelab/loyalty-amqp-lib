@@ -11,7 +11,7 @@ describe('_getChannel', () => {
 
     const _getChannel = AMQP.__get__('_getChannel');
 
-    it('returns existing channel', async function () {
+    it('returns existing channel if exists', async function () {
         const base = { _channel: new EventEmitter(), logger: mockLogger };
         const channel = await _getChannel(base, false);
         expect(channel).to.deep.equal(base._channel);

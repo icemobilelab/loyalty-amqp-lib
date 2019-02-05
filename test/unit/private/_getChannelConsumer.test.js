@@ -17,14 +17,13 @@ describe('_getChannelConsumer', () => {
     });
 
     it('returned function should call emit on base', function (done) {
-        const callback = sinon.fake();
-        const base = { emit: callback };
+        const base = { emit: sinon.fake() };
         const channelConsumer = _getChannelConsumer(base, mockLogger);
         const message = 'hello there';
         const data = { fields: [], content: message };
         channelConsumer(data);
-        expect(callback.callCount).to.equal(1);
-        expect(callback.getCall(0).args[1]).to.equal(message);
+        expect(base.emit.callCount).to.equal(1);
+        expect(base.emit.getCall(0).args[1]).to.equal(message);
         done();
     });
 
