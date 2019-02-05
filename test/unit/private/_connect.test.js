@@ -45,9 +45,7 @@ describe('_connect', () => {
 
     it('Calls close handler on connection close', function (done) {
         this.timeout(2000);
-
         mitty.once('handledClose', done);
-
         _connect(base)
             .then((conn) => {
                 conn.emit('close');
