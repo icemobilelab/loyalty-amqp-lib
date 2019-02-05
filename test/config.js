@@ -5,6 +5,20 @@ const convict = require('convict');
 process.env.BLUEBIRD_DEBUG = 1;
 
 const config = convict({
+    log: {
+        name: {
+            doc: 'Log name',
+            format: String,
+            default: 'AMQP-lib-test',
+            env: 'LOG_NAME'
+        },
+        level: {
+            doc: 'Log level',
+            format: String,
+            default: 'trace',
+            env: 'LOG_LEVEL'
+        }
+    },
     amqp: {
         host: {
             doc: 'The host of the RabbitMQ service.',
