@@ -7,10 +7,6 @@ const AMQP = rewire('../../../lib/amqp-base');
 const sinon = require('sinon');
 const mockLogger = require('../../util/mock-logger');
 
-// inner function should emit event on base object
-
-
-
 describe('_getChannelConsumer', () => {
 
     const _getChannelConsumer = AMQP.__get__('_getChannelConsumer');
