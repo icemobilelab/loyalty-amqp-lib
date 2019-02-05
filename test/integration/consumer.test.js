@@ -25,7 +25,7 @@ describe('Listening to a queue', () => {
 
     it('Listens to message events', function (done) {
         const msg = 'hello world';
-        consumer.start();
+        consumer.listen();
         consumer.once('message', message => {
             expect(message).to.be.eql(msg);
             done();
