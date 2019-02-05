@@ -41,6 +41,15 @@ describe('_connect', () => {
         _connect(base, true);
     });
 
+    it('Emits disconnect event', function (done) {
+        this.timeout(2000);
+        base.once('disconnect', done);
+        _connect(base)
+            .then((conn) => {
+                conn.emit('close');
+            });
+    });
+
     it('Calls close handler on connection close', function (done) {
         mitty.once('handledClose', done);
         _connect(base)
