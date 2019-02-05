@@ -9,18 +9,25 @@ const constructor = require('../../util/constructor');
 
 describe('_connect', () => {
 
-    async function _connect(base) {
+    AMQP.__set__('_connectionCloseHandler', function(...args) {
+        console.log('correct:', ...args);
+        done();
+    });
+    async function _connect(base, ...args) {
         const inner = AMQP.__get__('_connect');
-        return await inner(base);
+        return await inner(base, ...args);
     }
     const connection = new EventEmitter();
     AMQP.__set__('_createConnection', async () => {
         return Promise.resolve(connection);
     });
 
-    let base = new AMQP.AMQP(constructor(config));
-    beforeEach(() => {
-        base = new AMQP.AMQP(constructor(config));
+    const base = new AMQP.AMQP(constructor(config));
+    // beforeEach(() => {
+    //     base = new AMQP.AMQP(constructor(config));
+    // });
+    afterEach(() => {
+        base.removeAllListeners();
     });
 
     it('Successfully connects', async function () {
@@ -32,21 +39,21 @@ describe('_connect', () => {
     it('Emits connect event', function (done) {
         this.timeout(2000);
 
-        base.on('connect', done);
+        base.once('connect', done);
         _connect(base);
     });
     it('Emits reconnect event', function (done) {
         this.timeout(2000);
 
-        base.on('reconnect', done);
+        base.once('reconnect', done);
         _connect(base, true);
     });
     it('Calls close handler on connection close', function (done) {
         this.timeout(2000);
 
-        AMQP.__set__('_connectionCloseHandler', done);
-
-        _connect(base);
-        connection.emit('close');
+        _connect(base)
+            .then((conn) => {
+                conn.emit('close');
+            });
     });
 });
