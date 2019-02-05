@@ -1,0 +1,52 @@
+'use strict';
+
+const { expect } = require('chai');
+const { EventEmitter } = require('events');
+const rewire = require('rewire');
+const AMQP = rewire('../../../lib/amqp-base');
+const config = require('../../config');
+const constructor = require('../../util/constructor');
+
+describe('_connect', () => {
+
+    async function _connect(base) {
+        const inner = AMQP.__get__('_connect');
+        return await inner(base);
+    }
+    const connection = new EventEmitter();
+    AMQP.__set__('_createConnection', async () => {
+        return Promise.resolve(connection);
+    });
+
+    let base = new AMQP.AMQP(constructor(config));
+    beforeEach(() => {
+        base = new AMQP.AMQP(constructor(config));
+    });
+
+    it('Successfully connects', async function () {
+        this.timeout(2000);
+
+        const conn = await _connect(base);
+        expect(conn, 'returns created connection').to.be.eql(connection);
+    });
+    it('Emits connect event', function (done) {
+        this.timeout(2000);
+
+        base.on('connect', done);
+        _connect(base);
+    });
+    it('Emits reconnect event', function (done) {
+        this.timeout(2000);
+
+        base.on('reconnect', done);
+        _connect(base, true);
+    });
+    it('Calls close handler on connection close', function (done) {
+        this.timeout(2000);
+
+        AMQP.__set__('_connectionCloseHandler', done);
+
+        _connect(base);
+        connection.emit('close');
+    });
+});
