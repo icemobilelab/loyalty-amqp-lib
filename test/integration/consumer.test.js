@@ -16,7 +16,7 @@ describe('Listening to a queue', () => {
 
     it('Connects and listens to a queue', function (done) {
         consumer.once('listen', done);
-        consumer.start();
+        consumer.listen();
     });
 
     it('Handles errors when listening to a queue', function (done) {
