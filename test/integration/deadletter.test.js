@@ -36,8 +36,7 @@ describe('Dead letter queue', () => {
             done();
         });
 
-        await queue.start();
-        await dlq.start();
+        await dlq.listen();
         queue.publish(msg);
 
     });
