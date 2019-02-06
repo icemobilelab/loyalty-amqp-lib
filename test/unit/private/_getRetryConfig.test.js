@@ -16,7 +16,7 @@ describe('_getRetryConfig()', () => {
     });
 
     it('When passed, max_tries should be set to passed in value', function (done) {
-        expect(getRetryConfig({ max_tries: 9 }).max_tries).to.equal(9); // eslint-disable-line camelcase
+        expect(getRetryConfig({ maxTries: 9 }).max_tries).to.equal(9); // eslint-disable-line camelcase
         done();
     });
 
