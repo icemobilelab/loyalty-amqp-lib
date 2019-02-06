@@ -12,8 +12,14 @@ describe('Listening to a queue', () => {
     let _getChannel = AMQP.__get__('_getChannel');
     let consumer = new AMQPConsumer(queueOptions(config));
 
+
+    beforeEach(() => {
+        consumer = new AMQPConsumer(queueOptions(config));
+        // consumer.stop();
+    });
     after(() => {
-        consumer.stop();
+        consumer.removeAllListeners();
+        // consumer.stop();
     });
 
     it('Connects and listens to a queue', function (done) {
@@ -21,7 +27,7 @@ describe('Listening to a queue', () => {
         consumer.listen();
     });
 
-    it.only('Handles errors when listening to a queue', function (done) {
+    it('Handles errors when listening to a queue', function (done) {
         consumer.once('reconnect', done);
         consumer.listen();
         _getChannel(consumer)
