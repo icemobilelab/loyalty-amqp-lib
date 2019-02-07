@@ -4,7 +4,6 @@ const { expect } = require('chai');
 const { EventEmitter } = require('events');
 const rewire = require('rewire');
 const AMQP = rewire('../../../lib/amqp-base');
-const sinon = require('sinon');
 const mockLogger = require('../../util/mock-logger');
 
 describe('_getChannel', () => {
@@ -18,8 +17,12 @@ describe('_getChannel', () => {
     });
 
     it('creates new channel if none exists', async function () {
+
+        // some extensive mocking here, need to test
+        // this with a real channel and exchange
         const base = { _channel: undefined, logger: mockLogger };
         const newChannel = new EventEmitter();
+        newChannel.checkExchange = channel => Promise.resolve(channel);
 
         AMQP.__set__('_createChannel', async function () {
             return newChannel;
