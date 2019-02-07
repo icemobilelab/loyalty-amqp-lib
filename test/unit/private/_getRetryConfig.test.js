@@ -19,13 +19,15 @@ describe('_getRetryConfig()', () => {
     });
 
     it('throw_original should be overridden to true', function (done) {
-        expect(getRetryConfig({ throw_original: false }).throw_original).to.equal(true); // eslint-disable-line camelcase
+        expect(getRetryConfig({ throw_original: false }) // eslint-disable-line camelcase
+            .throw_original).to.equal(true);
         done();
     });
 
     it('arbitrary passed in values should be merged', function (done) {
         const arbString = 'thisOne';
-        expect(getRetryConfig({ anyProperty: arbString }).anyProperty).to.equal(arbString); // eslint-disable-line camelcase
+        expect(getRetryConfig({ anyProperty: arbString })
+            .anyProperty).to.equal(arbString);
         done();
     });
 
