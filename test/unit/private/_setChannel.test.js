@@ -5,6 +5,7 @@ const rewire = require('rewire');
 const AMQP = rewire('../../../lib/amqp-base');
 const config = require('../../config');
 const constructor = require('../../util/constructor');
+
 describe('_setChannel', () => {
 
     function _setChannel(base, ...args) {

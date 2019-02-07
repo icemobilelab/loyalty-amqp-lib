@@ -3,8 +3,6 @@
 const { expect } = require('chai');
 const rewire = require('rewire');
 const AMQPBase = rewire('../../../lib/amqp-base');
-const { EventEmitter } = require('events');
-
 
 describe('_getRetryConfig()', () => {
 

@@ -6,8 +6,6 @@ const AMQP = rewire('../../../lib/amqp-base');
 const config = require('../../config');
 const constructor = require('../../util/constructor');
 
-
-
 describe('_createConnection', () => {
 
     const base = new AMQP.AMQP(constructor(config));

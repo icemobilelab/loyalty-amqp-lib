@@ -1,10 +1,8 @@
 'use strict';
 
 const { expect } = require('chai');
-const { EventEmitter } = require('events');
 const rewire = require('rewire');
 const AMQP = rewire('../../../lib/amqp-base');
-const mockLogger = require('../../util/mock-logger');
 const config = require('../../config');
 const constructor = require('../../util/constructor');
 
