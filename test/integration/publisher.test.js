@@ -1,9 +1,9 @@
 'use strict';
 
 const { expect } = require('chai');
-const { AMQPConsumer, AMQPPublisher } = require('../../index');
 const rewire = require('rewire');
 const AMQP = rewire('../../lib/amqp-base');
+const { AMQPConsumer, AMQPPublisher } = require('../../index');
 const config = require('../config');
 const queueOptions = require('../util/constructor');
 
@@ -48,22 +48,21 @@ describe('Publishing to an exchange', () => {
 
     });
 
-    // it.only('Handles errors when publishing a message', async function () {
+    it('Handles errors when publishing a message', async function () {
 
-    //     const { AMQPPublisher } = rewire('../../index');
-    //     const producer = new AMQPPublisher(queueOptions(config));
+        const AMQPPublisher = rewire('../../lib/amqp-publisher');
+        AMQPPublisher.__set__('_getChannel', () => {
+            return Promise.reject(new Error('no channel here my pretties'));
+        });
 
-    //     AMQP.__set__('_getChannel', () => {
-    //         return Promise.reject(new Error('no channel here my pretties'));
-    //     });
+        const producer = new AMQPPublisher(queueOptions(config));
 
-    //     await new Promise(async (resolve) => {
-    //         producer.once('error', err => {
-    //             console.log('ERROR', err);
-    //             expect(err).to.exist;
-    //             resolve();
-    //         });
-    //         producer.publish('we expect this to break');
-    //     });
-    // });
+        await new Promise(async (resolve) => {
+            producer.once('error', err => {
+                expect(err).to.exist;
+                resolve();
+            });
+            producer.publish('we expect this to break');
+        });
+    });
 });
