@@ -18,7 +18,7 @@ describe('_getChannel', () => {
 
     it('creates new channel if none exists', async function () {
 
-        // some extensive mocking here, need to test
+        // todo: some extensive mocking here, need to test
         // this with a real channel and exchange
         const base = { _channel: undefined, logger: mockLogger };
         const newChannel = new EventEmitter();
