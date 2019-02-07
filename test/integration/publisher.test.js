@@ -15,15 +15,15 @@ describe('Publishing to an exchange', () => {
 
     it('Publishes a message to an exchange', async function () {
         this.timeout(10000);
-        const message = 'hello world';
+        const msg = 'hello world';
 
         await new Promise(async (resolve) => {
             await consumer.listen();
             consumer.once('message', message => {
-                expect(message).to.be.eql(message);
+                expect(message).to.be.eql(msg);
                 resolve();
             });
-            await producer.publish(message);
+            await producer.publish(msg);
         });
 
     });
@@ -49,7 +49,6 @@ describe('Publishing to an exchange', () => {
     });
 
     it('Handles errors when publishing a message', async function () {
-
         const AMQPPublisher = rewire('../../lib/amqp-publisher');
         AMQPPublisher.__set__('_getChannel', () => {
             return Promise.reject(new Error('no channel here my pretties'));
