@@ -13,47 +13,57 @@ describe('Publishing to an exchange', () => {
     const producer = new AMQPPublisher(queueOptions(config));
     const consumer = new AMQPConsumer(queueOptions(config));
 
-    it('Publishes a message to an exchange', async function (done) {
+    it('Publishes a message to an exchange', async function () {
         this.timeout(10000);
+        const message = 'hello world';
 
-        const msg = 'hello world';
-        await consumer.listen();
-        consumer.once('message', message => {
-            expect(message).to.be.eql(msg);
-            done();
+        await new Promise(async (resolve) => {
+            await consumer.listen();
+            consumer.once('message', message => {
+                expect(message).to.be.eql(message);
+                resolve();
+            });
+            await producer.publish(message);
         });
-        await producer.publish(msg);
+
     });
 
-    it('Publishes a lot of messages', async function (done) {
+    it('Publishes a lot of messages', async function () {
         this.timeout(10000);
-
         const amount = 1000;
-        await consumer.listen();
-        consumer.on('message', message => {
-            expect(message).to.be.a('string');
-            if (message === `#${amount}`) {
-                consumer.removeAllListeners();
-                done();
+
+        await new Promise(async (resolve) => {
+            await consumer.listen();
+            for (let i = 0; i <= amount; i++) {
+                await producer.publish(`#${i}`);
             }
+            consumer.on('message', message => {
+                expect(message).to.be.a('string');
+                if (message === `#${amount}`) {
+                    consumer.removeAllListeners();
+                    resolve();
+                }
+            });
         });
 
-        for (let i = 0; i <= amount; i++) {
-            await producer.publish(`#${i}`);
-        }
     });
 
-    it('Handles errors when publishing a message', function (done) {
-        // sandbox.stub(producer, 'getChannel').rejects();
-        const resolve = AMQP.__set__('_getChannel', () => {
-            console.log('triggered');
-            return Promise.reject(new Error('no channel here my pretties'));
-        });
-        producer.once('error', err => {
-            expect(err).to.exist;
-            resolve();
-            done();
-        });
-        producer.publish('we expect this to break');
-    });
+    // it.only('Handles errors when publishing a message', async function () {
+
+    //     const { AMQPPublisher } = rewire('../../index');
+    //     const producer = new AMQPPublisher(queueOptions(config));
+
+    //     AMQP.__set__('_getChannel', () => {
+    //         return Promise.reject(new Error('no channel here my pretties'));
+    //     });
+
+    //     await new Promise(async (resolve) => {
+    //         producer.once('error', err => {
+    //             console.log('ERROR', err);
+    //             expect(err).to.exist;
+    //             resolve();
+    //         });
+    //         producer.publish('we expect this to break');
+    //     });
+    // });
 });
