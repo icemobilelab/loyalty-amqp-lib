@@ -11,18 +11,9 @@ const queueOptions = require('../util/constructor');
 
 describe('Starting up the queue', () => {
 
-    let queue = new AMQPConsumer(queueOptions(config));
-    beforeEach(() => {
-        queue = new AMQPConsumer(queueOptions(config));
-    });
-
-    afterEach(async () => {
-        queue.removeAllListeners();
-        queue.stop();
-    });
-
     it('Retries connection to the AMQP server with maxTries', function (done) {
         this.timeout(50000);
+        let queue = new AMQPConsumer(queueOptions(config));
 
         const maxTries = 1;
         let options = queueOptions(config);
@@ -51,6 +42,7 @@ describe('Starting up the queue', () => {
 
     it('Retries connection to the AMQP server indefinitely', function (done) {
         this.timeout(4000);
+        let queue = new AMQPConsumer(queueOptions(config));
 
         const maxTries = -1;
         let options = queueOptions(config);
@@ -111,15 +103,20 @@ describe('Handles AMQP disconnects', () => {
     });
 
     it('Reconnects on Connection close event', function (done) {
+
+        let queue = new AMQPConsumer(queueOptions(config));
+
         this.timeout(50000);
         // Use rewire to get un-exported function
         const _getConnection = AMQP.__get__('_getConnection');
-        queue.once('reconnect', done);
+        queue.once('reconnect', () => {
+            done();
+        });
         queue.listen()
             .then(() => {
                 _getConnection(queue, false)
                     .then(conn => {
-                        conn.close();
+                        conn.emit('close', new Error());
                     });
             });
     });
