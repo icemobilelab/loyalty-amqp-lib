@@ -51,7 +51,7 @@ describe('Publishing to an exchange', () => {
     it('Handles errors when publishing a message', async function () {
         const AMQPPublisher = rewire('../../lib/amqp-publisher');
         AMQPPublisher.__set__('_getChannel', () => {
-            return Promise.reject(new Error('no channel here my pretties'));
+            return Promise.reject(new Error());
         });
 
         const producer = new AMQPPublisher(queueOptions(config));
