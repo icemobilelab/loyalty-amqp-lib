@@ -10,18 +10,17 @@ const queueOptions = require('../util/constructor');
 
 describe('Handle connecting & disconnecting', () => {
 
+    let queue = new AMQPConsumer(queueOptions(config));
+    beforeEach(() => {
+        queue = new AMQPConsumer(queueOptions(config));
+    });
+
+    afterEach(async () => {
+        queue.removeAllListeners();
+        queue.stop();
+    });
+
     describe('Starting up the queue', () => {
-
-        let queue = new AMQPConsumer(queueOptions(config));
-        beforeEach(() => {
-            queue = new AMQPConsumer(queueOptions(config));
-        });
-
-        afterEach(async () => {
-            queue.removeAllListeners();
-            queue.stop();
-        });
-
         it('Retries connection to the AMQP server with maxTries', function (done) {
             this.timeout(50000);
 
@@ -78,8 +77,6 @@ describe('Handle connecting & disconnecting', () => {
     });
 
     describe('Shutting down the queue', () => {
-        let queue = new AMQPConsumer(queueOptions(config));
-
         it('Closes an open connection to AMQP', function (done) {
             queue.once('close', () => {
                 expect(queue._connection).to.be.undefined;
@@ -94,11 +91,8 @@ describe('Handle connecting & disconnecting', () => {
 
     describe('Handles AMQP disconnects', () => {
         const { _getChannel } = require('../../lib/amqp-base');
-
-        let queue = new AMQPConsumer(queueOptions(config));
-        beforeEach(() => {
-            queue = new AMQPConsumer(queueOptions(config));
-        });
+        // Use rewire to get un-exported function
+        const _getConnection = AMQP.__get__('_getConnection');
 
         it('Reconnects on Channel close event', function (done) {
             queue.once('reconnect', done);
@@ -113,8 +107,6 @@ describe('Handle connecting & disconnecting', () => {
 
         it('Reconnects on Connection close event', function (done) {
             this.timeout(50000);
-            // Use rewire to get un-exported function
-            const _getConnection = AMQP.__get__('_getConnection');
             queue.once('reconnect', done);
             queue.listen()
                 .then(() => {
@@ -140,8 +132,6 @@ describe('Handle connecting & disconnecting', () => {
 
         it('Listens again on Connection close event', function (done) {
             this.timeout(5000);
-            // Use rewire to get un-exported function
-            const _getConnection = AMQP.__get__('_getConnection');
             queue.once('reconnect', () => {
                 queue.once('listen', done);
             });
