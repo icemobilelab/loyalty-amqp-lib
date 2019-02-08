@@ -8,19 +8,37 @@ const config = require('../config');
 const queueOptions = require('../util/constructor');
 
 
+
 describe('Publishing to an exchange', () => {
 
-    const producer = new AMQPPublisher(queueOptions(config));
-    const consumer = new AMQPConsumer(queueOptions(config));
+    let options = Object.assign(queueOptions(config), { instanceId: 'A' });
+    const producer = new AMQPPublisher(options);
+
+    let consumer;
+    let counter = 1;
+    beforeEach(() => {
+        ++counter;
+        consumer = new AMQPConsumer(Object.assign(queueOptions(config), { instanceId: counter }));
+    });
+
+    afterEach(() => {
+        if (consumer) {
+            consumer.removeAllListeners();
+            consumer.stop();
+        }
+    });
 
     it('Publishes a message to an exchange', async function () {
-        this.timeout(10000);
+        this.timeout(1000);
         const msg = 'hello world';
 
         await new Promise(async (resolve) => {
             await consumer.listen();
-            consumer.once('message', message => {
+            consumer.removeAllListeners();
+
+            consumer.on('message', function meHere(message) {
                 expect(message).to.be.eql(msg);
+                consumer.removeAllListeners();
                 resolve();
             });
             await producer.publish(msg);
@@ -30,7 +48,7 @@ describe('Publishing to an exchange', () => {
 
     it('Publishes a lot of messages', async function () {
         this.timeout(10000);
-        const amount = 1000;
+        const amount = 10;
 
         await new Promise(async (resolve) => {
             await consumer.listen();
@@ -45,7 +63,6 @@ describe('Publishing to an exchange', () => {
                 }
             });
         });
-
     });
 
     it('Handles errors when publishing a message', async function () {
