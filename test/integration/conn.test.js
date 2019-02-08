@@ -112,7 +112,7 @@ describe('Handle connecting & disconnecting', () => {
                 .then(() => {
                     _getConnection(queue, false)
                         .then(conn => {
-                            conn.close();
+                            conn.emit('close', new Error());
                         });
                 });
         });
