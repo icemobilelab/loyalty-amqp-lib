@@ -1,11 +1,9 @@
 'use strict';
 
 const { expect } = require('chai');
-const Bluebird = require('bluebird');
 const { AMQPConsumer, AMQPPublisher } = require('../../index');
 const rewire = require('rewire');
 const AMQP = rewire('../../lib/amqp-base');
-const config = require('../config');
 const queueOptions = require('../util/constructor');
 
 
@@ -104,10 +102,9 @@ describe('(re)connects with consumer tag', () => {
 
             consumer.once('reconnect', () => {
                 consumer.once('listen', () => {
-                    console.log('\n--- listening after reconnect');
                     producer.publish(message);
                     consumer.once('message', msg => {
-                        console.log('received message:', msg);
+                        expect(message, 'Received the wrong message').to.eql(msg);
                         done();
                     });
                 });
