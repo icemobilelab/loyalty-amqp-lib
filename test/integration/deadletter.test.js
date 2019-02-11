@@ -3,41 +3,56 @@
 const { expect } = require('chai');
 const rewire = require('rewire');
 const { AMQPConsumer, AMQPPublisher } = rewire('../../index');
-const config = require('../config');
+const AMQP = rewire('../../lib/amqp-base');
 const queueOptions = require('../util/constructor');
 
 describe('Dead letter queue', () => {
 
-    let queue;
-    let dlq;
+    let _getChannel = AMQP.__get__('_getChannel');
+    let consumer, producer, config;
+    let testNum = 0;
 
     beforeEach(() => {
-        queue = new AMQPPublisher(queueOptions(config));
-        dlq = new AMQPConsumer(queueOptions(config));
-
-        // have queue publish to listener. listener nacks -> msg goes to dlq
-        // queue.__set__('')
-        // rewire dlq so internal deadletter points to dlq
-        dlq.__set__('exchange', 'dlq');
+        config = queueOptions(++testNum);
+        consumer = new AMQPConsumer(config);
+        producer = new AMQPPublisher(config);
     });
 
-    it('Sends nonacknowledged messages to the dead letter queue', async function (done) {
+    afterEach(() => {
+        if (consumer) {
+            consumer.removeAllListeners();
+            consumer.stop();
+        }
+    });
+
+
+    it('Sends nonacknowledged messages to the dead letter queue', async function () {
         this.timeout(0);
 
-        const msg = 'Dead pigeon';
-        queue.on('message', (messageString, data) => {
-            queue._channel.nack(data, false, false);
+        // have queue publish to listener. listener nacks -> msg goes to dlq
+        await new Promise(async (resolve) => {
+
+            const dlq = new AMQPConsumer({ ...config, ...{ queue: 'dlq' } });
+            await dlq.listen();
+            await consumer.listen();
+
+            const msg = 'Dead pigeon';
+
+            consumer.on('message', async (messageString, data) => {
+                const channel = await _getChannel(consumer);
+                channel.nack(data, false, false);
+            });
+
+            dlq.on('message', (messageString) => {
+                expect(messageString).to.be.a('string').and.eql(msg);
+                dlq.stop();
+                resolve();
+            });
+
+            producer.publish(msg);
         });
 
-        dlq.on('message', (messageString) => {
-            expect(messageString).to.be.a('string').and.eql(msg);
-            queue.stop();
-            dlq.stop();
-            done();
-        });
 
-        await dlq.listen();
-        queue.publish(msg);
 
     });
 });
