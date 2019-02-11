@@ -2,60 +2,63 @@
 
 const { expect } = require('chai');
 const Bluebird = require('bluebird');
-const { AMQPConsumer } = require('../../index');
+const { AMQPConsumer, AMQPPublisher } = require('../../index');
 const rewire = require('rewire');
 const AMQP = rewire('../../lib/amqp-base');
 const config = require('../config');
 const queueOptions = require('../util/constructor');
 
 
-describe('(re)connects with consumer tag', () => {
+let counter = 0;
+function getOptions(serviceName = `consumer-tag-${++counter}`) {
+    return {
+        ...queueOptions(serviceName),
+        serviceName
+    };
+}
 
-    describe('Starting up the queue', () => {
+describe.only('(re)connects with consumer tag', () => {
 
-        let options = queueOptions(config);
+    describe('Starting up the queue and listening', () => {
 
-        let _getChannel = AMQP.__get__('_getChannel');
-        let consumer = new AMQPConsumer(options);
-        const producer = new AMQPPublisher(options);
-
+        let consumer;
         after(() => {
             consumer.removeAllListeners();
             consumer.stop();
         });
 
-        // if moved to bottom, will fail, some shared state
-        // can mess these up(!)
+        it('Connects to the broker with consumer tag', async function () {
+            this.timeout(10000);
+            consumer = new AMQPConsumer(getOptions('ctag-listener'));
+
+            return await new Promise(async (resolve) => {
+                consumer.once('listen', resolve);
+                consumer.listen();
+            });
+        });
+
         it('Listens to message events', async function () {
             this.timeout(10000);
             const message = 'hello world';
+            const options = getOptions('ctag-publisher');
+            const producer = new AMQPPublisher(options);
+            consumer = new AMQPConsumer(options);
+            after(() => {
+                producer.stop();
+            });
 
             return await new Promise(async (resolve) => {
-                await consumer.listen();
                 consumer.once('message', msg => {
                     expect(message).to.be.eql(msg);
                     resolve();
                 });
+                await consumer.listen();
                 await producer.publish(message);
             });
         });
     });
 
-    describe('Shutting down the queue', () => {
-        let queue = new AMQPConsumer(queueOptions(config));
-
-        it('Closes an open connection to AMQP', function (done) {
-            queue.once('close', () => {
-                expect(queue._connection).to.be.undefined;
-                done();
-            });
-            queue.listen()
-                .then(() => {
-                    queue.stop();
-                });
-        });
-    });
-
+    // @TODO: everything below is just copy/paste
     describe('Handles AMQP disconnects', () => {
         // Use rewire to get un-exported function
         const _getConnection = AMQP.__get__('_getConnection');
