@@ -10,12 +10,10 @@ const queueOptions = require('../util/constructor');
 describe('Listening to a queue', () => {
 
     let _getChannel = AMQP.__get__('_getChannel');
-    let consumer = new AMQPConsumer(queueOptions(config));
-    const producer = new AMQPPublisher(queueOptions(config));
-
+    let consumer, producer;
 
     beforeEach(() => {
-        consumer = new AMQPConsumer(queueOptions(config));
+        // consumer = new AMQPConsumer(queueOptions(config));
     });
 
     afterEach(() => {
@@ -28,6 +26,12 @@ describe('Listening to a queue', () => {
     // if moved to bottom, will fail, some shared state
     // can mess these up(!)
     it('Listens to message events', async function () {
+        const queueConfig = {
+            ...queueOptions(config), ...{ queue: 'Q001', exchange: 'E001' }
+        };
+        consumer = new AMQPConsumer(queueConfig);
+        producer = new AMQPPublisher(queueConfig);
+
         const message = 'hello world';
 
         return await new Promise(async (resolve) => {
@@ -41,6 +45,11 @@ describe('Listening to a queue', () => {
     });
 
     it('Connects and listens to a queue', async function () {
+        const queueConfig = {
+            ...queueOptions(config), ...{ queue: 'Q002', exchange: 'E002' }
+        };
+        consumer = new AMQPConsumer(queueConfig);
+
         await new Promise(async (resolve) => {
             consumer.once('listen', () => {
                 resolve();
@@ -50,7 +59,11 @@ describe('Listening to a queue', () => {
 
     });
 
-    it('Handles errors when listening to a queue', async function () {
+    it.only('Handles errors when listening to a queue', async function () {
+        const queueConfig = {
+            ...queueOptions(config), ...{ queue: 'Q003', exchange: 'E003' }
+        };
+        consumer = new AMQPConsumer(queueConfig);
         await new Promise(async (resolve) => {
             const channel = await _getChannel(consumer);
             consumer.once('reconnect', () => {
