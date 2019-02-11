@@ -19,16 +19,17 @@ function getOptions(serviceName = `consumer-tag-${++counter}`) {
 
 describe('(re)connects with consumer tag', () => {
 
-    describe('Starting up the queue and listening', () => {
+    let consumer;
+    after(() => {
+        consumer.removeAllListeners();
+        consumer.stop();
+    });
 
-        let consumer;
-        after(() => {
-            consumer.removeAllListeners();
-            consumer.stop();
-        });
+    describe('Starting up the queue and listening', () => {
 
         it('Connects to the broker with consumer tag', async function () {
             this.timeout(10000);
+
             consumer = new AMQPConsumer(getOptions('ctag-listener'));
 
             return await new Promise(async (resolve) => {
@@ -53,27 +54,23 @@ describe('(re)connects with consumer tag', () => {
                     resolve();
                 });
                 await consumer.listen();
-                await producer.publish(message);
+                producer.publish(message);
             });
         });
     });
 
-    // @TODO: everything below is just copy/paste
     describe('Handles AMQP disconnects', () => {
         // Use rewire to get un-exported function
         const _getConnection = AMQP.__get__('_getConnection');
         const { _getChannel } = require('../../lib/amqp-base');
 
-        let queue = new AMQPConsumer(getOptions());
-        beforeEach(() => {
-            queue = new AMQPConsumer(getOptions());
-        });
-
         it('Reconnects on Channel close event', function (done) {
-            queue.once('reconnect', done);
-            queue.listen()
+            consumer = new AMQPConsumer(getOptions('ctag-listener'));
+
+            consumer.once('reconnect', done);
+            consumer.listen()
                 .then(() => {
-                    _getChannel(queue)
+                    _getChannel(consumer)
                         .then(channel => {
                             // channel.close();
                             channel.emit('close', new Error());
@@ -83,12 +80,14 @@ describe('(re)connects with consumer tag', () => {
 
         it('Reconnects on Connection close event', function (done) {
             this.timeout(50000);
-            queue.once('reconnect', () => {
+            consumer = new AMQPConsumer(getOptions('ctag-reconnect-conn-close'));
+
+            consumer.once('reconnect', () => {
                 done();
             });
-            queue.listen()
+            consumer.listen()
                 .then(() => {
-                    _getConnection(queue, false)
+                    _getConnection(consumer, false)
                         .then(conn => {
                             // conn.close();
                             conn.emit('close', new Error());
@@ -97,12 +96,25 @@ describe('(re)connects with consumer tag', () => {
         });
 
         it('Listens again on Channel close event', function (done) {
-            queue.once('reconnect', () => {
-                queue.once('listen', done);
+            this.timeout(5000);
+            const options = getOptions('ctag-reconnect-publisher');
+            const producer = new AMQPPublisher(options);
+            consumer = new AMQPConsumer(options);
+            const message = 'Test message';
+
+            consumer.once('reconnect', () => {
+                consumer.once('listen', () => {
+                    console.log('\n--- listening after reconnect');
+                    producer.publish(message);
+                    consumer.once('message', msg => {
+                        console.log('received message:', msg);
+                        done();
+                    });
+                });
             });
-            queue.listen()
+            consumer.listen()
                 .then(() => {
-                    _getChannel(queue)
+                    _getChannel(consumer)
                         .then(channel => {
                             // channel.close();
                             channel.emit('close', new Error());
@@ -112,12 +124,14 @@ describe('(re)connects with consumer tag', () => {
 
         it('Listens again on Connection close event', function (done) {
             this.timeout(5000);
-            queue.once('reconnect', () => {
-                queue.once('listen', done);
+            consumer = new AMQPConsumer(getOptions('ctag-listener-conn-close'));
+
+            consumer.once('reconnect', () => {
+                consumer.once('listen', done);
             });
-            queue.listen()
+            consumer.listen()
                 .then(() => {
-                    _getConnection(queue, false)
+                    _getConnection(consumer, false)
                         .then(conn => {
                             // conn.close();
                             conn.emit('close', new Error());
