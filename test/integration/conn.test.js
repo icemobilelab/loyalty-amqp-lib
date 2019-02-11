@@ -96,7 +96,10 @@ describe('Handle connecting & disconnecting', () => {
         });
 
         it('Reconnects on Channel close event', function (done) {
-            queue.once('reconnect', done);
+            queue.once('reconnect', () => {
+                queue.stop()
+                    .then(done);
+            });
             queue.listen()
                 .then(() => {
                     _getChannel(queue)
@@ -108,11 +111,10 @@ describe('Handle connecting & disconnecting', () => {
 
         it('Reconnects on Connection close event', function (done) {
 
-            let queue = new AMQPConsumer(queueOptions(config));
-
             this.timeout(50000);
             queue.once('reconnect', () => {
-                done();
+                queue.stop()
+                    .then(done);
             });
             queue.listen()
                 .then(() => {
@@ -124,8 +126,12 @@ describe('Handle connecting & disconnecting', () => {
         });
 
         it('Listens again on Channel close event', function (done) {
+
             queue.once('reconnect', () => {
-                queue.once('listen', done);
+                queue.once('listen', () => {
+                    queue.stop()
+                        .then(done);
+                });
             });
             queue.listen()
                 .then(() => {
@@ -138,10 +144,14 @@ describe('Handle connecting & disconnecting', () => {
 
         it('Listens again on Connection close event', function (done) {
             this.timeout(5000);
+
             // Use rewire to get un-exported function
             const _getConnection = AMQP.__get__('_getConnection');
             queue.once('reconnect', () => {
-                queue.once('listen', done);
+                queue.once('listen', () => {
+                    queue.stop()
+                        .then(done);
+                });
             });
             queue.listen()
                 .then(() => {

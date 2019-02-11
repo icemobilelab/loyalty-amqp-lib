@@ -57,6 +57,30 @@ const config = convict({
                 default: 2,
                 env: 'AMQP_RETRY_BACKOFF'
             }
+        },
+        queue: {
+            doc: 'AMQP Queue',
+            format: String,
+            default: 'QUEUE',
+            env: 'AMQP_QUEUE'
+        },
+        exchange: {
+            doc: 'AMQP Exchange',
+            format: String,
+            default: 'EXCHANGE',
+            env: 'AMQP_EXCHANGE'
+        },
+        exchangeType: {
+            doc: 'AMQP Exchange Type',
+            format: String,
+            default: 'topic',
+            env: 'AMQP_EXCHANGE_TYPE'
+        },
+        route: {
+            doc: 'AMQP Route',
+            format: String,
+            default: 'ROUTE',
+            env: 'AMQP_ROUTE'
         }
     },
     sonarqube: {
