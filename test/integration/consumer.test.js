@@ -4,7 +4,6 @@ const { expect } = require('chai');
 const rewire = require('rewire');
 const { AMQPConsumer, AMQPPublisher } = require('../../index');
 const AMQP = rewire('../../lib/amqp-base');
-const config = require('../config');
 const queueOptions = require('../util/constructor');
 
 describe('Listening to a queue', () => {
