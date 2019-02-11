@@ -8,10 +8,6 @@ const AMQP = rewire('../../lib/amqp-base');
 const config = require('../config');
 const queueOptions = require('../util/constructor');
 
-process.on('unhandledRejection', error => {
-    console.log('📍 ', error.message);
-});
-
 describe('Handle connecting & disconnecting', () => {
 
     let testNum = 0;
@@ -170,4 +166,3 @@ describe('Handle connecting & disconnecting', () => {
         });
     });
 });
-

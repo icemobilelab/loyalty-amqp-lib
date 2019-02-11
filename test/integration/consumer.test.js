@@ -6,11 +6,6 @@ const { AMQPConsumer, AMQPPublisher } = require('../../index');
 const AMQP = rewire('../../lib/amqp-base');
 const queueOptions = require('../util/constructor');
 
-process.on('unhandledRejection', error => {
-    console.log('📍 ', error.message);
-});
-
-
 describe('Listening to a queue', () => {
 
     let _getChannel = AMQP.__get__('_getChannel');
