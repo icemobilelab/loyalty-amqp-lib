@@ -4,7 +4,6 @@ const { expect } = require('chai');
 const rewire = require('rewire');
 const AMQP = rewire('../../lib/amqp-base');
 const { AMQPConsumer, AMQPPublisher } = require('../../index');
-const config = require('../config');
 const queueOptions = require('../util/constructor');
 
 
@@ -12,11 +11,11 @@ const queueOptions = require('../util/constructor');
 describe('Publishing to an exchange', () => {
 
     let testNum = 0;
-    let config = queueOptions(++testNum);
+    let config;
     let consumer, producer;
 
     beforeEach(() => {
-        config = queueOptions(++testNum);
+        config = queueOptions(`${++testNum}-publish`);
         consumer = new AMQPConsumer(config);
         producer = new AMQPPublisher(config);
     });
@@ -32,7 +31,7 @@ describe('Publishing to an exchange', () => {
         this.timeout(1000);
         const msg = 'hello world';
 
-        await new Promise(async (resolve) => {
+        return await new Promise(async (resolve) => {
             await consumer.listen();
             consumer.removeAllListeners();
 
@@ -50,7 +49,7 @@ describe('Publishing to an exchange', () => {
         this.timeout(10000);
         const amount = 10;
 
-        await new Promise(async (resolve) => {
+        return await new Promise(async (resolve) => {
             await consumer.listen();
             for (let i = 0; i <= amount; i++) {
                 await producer.publish(`#${i}`);
@@ -71,9 +70,9 @@ describe('Publishing to an exchange', () => {
             return Promise.reject(new Error());
         });
 
-        const producer = new AMQPPublisher(queueOptions(config));
+        const producer = new AMQPPublisher(queueOptions('testWithErrorMessage'));
 
-        await new Promise(async (resolve) => {
+        return await new Promise(async (resolve) => {
             producer.once('error', err => {
                 expect(err).to.exist;
                 resolve();

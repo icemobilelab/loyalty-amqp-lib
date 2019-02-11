@@ -5,18 +5,10 @@ const Bluebird = require('bluebird');
 const { AMQPConsumer } = require('../../index');
 const rewire = require('rewire');
 const AMQP = rewire('../../lib/amqp-base');
-const config = require('../config');
 const queueOptions = require('../util/constructor');
 
-process.on('unhandledRejection', error => {
-    console.log('📍 ', error.message);
-});
 
 describe('Handle connecting & disconnecting', () => {
-
-    let testNum = 0;
-    let config = queueOptions(++testNum);
-    let consumer, producer;
 
     describe('Starting up the queue', () => {
 

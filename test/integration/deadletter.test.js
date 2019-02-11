@@ -13,7 +13,7 @@ describe('Dead letter queue', () => {
     let testNum = 0;
 
     beforeEach(() => {
-        config = queueOptions(++testNum);
+        config = queueOptions(`${++testNum}-deadletter`);
         consumer = new AMQPConsumer(config);
         producer = new AMQPPublisher(config);
     });
