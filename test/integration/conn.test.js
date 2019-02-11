@@ -8,17 +8,24 @@ const AMQP = rewire('../../lib/amqp-base');
 const config = require('../config');
 const queueOptions = require('../util/constructor');
 
+process.on('unhandledRejection', error => {
+    console.log('📍 ', error.message);
+});
 
 describe('Handle connecting & disconnecting', () => {
+
+    let testNum = 0;
+    let config = queueOptions(++testNum);
+    let consumer, producer;
 
     describe('Starting up the queue', () => {
 
         it('Retries connection to the AMQP server with maxTries', function (done) {
             this.timeout(50000);
-            let queue = new AMQPConsumer(queueOptions(config));
+            let queue = new AMQPConsumer(queueOptions('maxTries'));
 
             const maxTries = 1;
-            let options = queueOptions(config);
+            let options = queueOptions('maxTries');
             options.host = 'nowhere';
             options.retry.maxTries = maxTries;
             options.retry.interval = 2;
@@ -44,10 +51,10 @@ describe('Handle connecting & disconnecting', () => {
 
         it('Retries connection to the AMQP server indefinitely', function (done) {
             this.timeout(4000);
-            let queue = new AMQPConsumer(queueOptions(config));
+            let queue = new AMQPConsumer(queueOptions('retryIndefinitely'));
 
             const maxTries = -1;
-            let options = queueOptions(config);
+            let options = queueOptions('retryIndefinitely');
             options.host = 'nowhere';
             options.retry.maxTries = maxTries;
             options.retry.interval = 2;
@@ -71,7 +78,7 @@ describe('Handle connecting & disconnecting', () => {
     });
 
     describe('Shutting down the queue', () => {
-        let queue = new AMQPConsumer(queueOptions(config));
+        let queue = new AMQPConsumer(queueOptions('shutDown'));
 
         it('Closes an open connection to AMQP', function (done) {
             queue.once('close', () => {
@@ -90,9 +97,9 @@ describe('Handle connecting & disconnecting', () => {
         const _getConnection = AMQP.__get__('_getConnection');
         const { _getChannel } = require('../../lib/amqp-base');
 
-        let queue = new AMQPConsumer(queueOptions(config));
+        let queue = new AMQPConsumer(queueOptions('handlesDisconnects'));
         beforeEach(() => {
-            queue = new AMQPConsumer(queueOptions(config));
+            queue = new AMQPConsumer(queueOptions('handlesDisconnects'));
         });
 
         it('Reconnects on Channel close event', function (done) {
