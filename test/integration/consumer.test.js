@@ -6,6 +6,11 @@ const { AMQPConsumer, AMQPPublisher } = require('../../index');
 const AMQP = rewire('../../lib/amqp-base');
 const queueOptions = require('../util/constructor');
 
+process.on('unhandledRejection', error => {
+    console.log('📍 ', error.message);
+});
+
+
 describe('Listening to a queue', () => {
 
     let _getChannel = AMQP.__get__('_getChannel');
@@ -35,6 +40,8 @@ describe('Listening to a queue', () => {
 
     });
 
+    // the amqplib will throw one unhandled rejection error when
+    // running this test, due to the reconnection logic.
     it('Handles errors when listening to a queue', async function () {
 
         await new Promise(async (resolve) => {
