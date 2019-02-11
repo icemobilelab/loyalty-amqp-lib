@@ -13,7 +13,7 @@ describe('Listening to a queue', () => {
     let testNum = 0;
 
     beforeEach(() => {
-        config = queueOptions(`${++testNum}-publish`);
+        config = queueOptions(`consumer-${++testNum}`);
         consumer = new AMQPConsumer(config);
         producer = new AMQPPublisher(config);
     });

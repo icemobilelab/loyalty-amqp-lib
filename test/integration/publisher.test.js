@@ -15,7 +15,7 @@ describe('Publishing to an exchange', () => {
     let consumer, producer;
 
     beforeEach(() => {
-        config = queueOptions(`${++testNum}-publish`);
+        config = queueOptions(`publisher-${++testNum}`);
         consumer = new AMQPConsumer(config);
         producer = new AMQPPublisher(config);
     });
