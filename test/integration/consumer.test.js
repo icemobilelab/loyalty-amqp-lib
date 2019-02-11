@@ -20,6 +20,7 @@ describe('Listening to a queue', () => {
 
     after(() => {
         consumer.removeAllListeners();
+        consumer.stop();
     });
 
     // if moved to bottom, will fail, some shared state
