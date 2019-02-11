@@ -3,8 +3,8 @@ const logger = require('./mock-logger');
 const config = require('../config');
 
 module.exports = function queueOptions(input = 'test-name') {
-    const queue = input+'.queue';
-    const exchange = input+'.exchange';
+    const queue = `${input}.queue`;
+    const exchange = `${input}.exchange`;
 
     return {
         // serviceName: `amqp-${new Date().toISOString()}`,
