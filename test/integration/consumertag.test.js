@@ -17,7 +17,7 @@ function getOptions(serviceName = `consumer-tag-${++counter}`) {
     };
 }
 
-describe.only('(re)connects with consumer tag', () => {
+describe('(re)connects with consumer tag', () => {
 
     describe('Starting up the queue and listening', () => {
 
@@ -64,9 +64,9 @@ describe.only('(re)connects with consumer tag', () => {
         const _getConnection = AMQP.__get__('_getConnection');
         const { _getChannel } = require('../../lib/amqp-base');
 
-        let queue = new AMQPConsumer(queueOptions(config));
+        let queue = new AMQPConsumer(getOptions());
         beforeEach(() => {
-            queue = new AMQPConsumer(queueOptions(config));
+            queue = new AMQPConsumer(getOptions());
         });
 
         it('Reconnects on Channel close event', function (done) {
@@ -75,15 +75,13 @@ describe.only('(re)connects with consumer tag', () => {
                 .then(() => {
                     _getChannel(queue)
                         .then(channel => {
-                            channel.close();
+                            // channel.close();
+                            channel.emit('close', new Error());
                         });
                 });
         });
 
         it('Reconnects on Connection close event', function (done) {
-
-            let queue = new AMQPConsumer(queueOptions(config));
-
             this.timeout(50000);
             queue.once('reconnect', () => {
                 done();
@@ -92,6 +90,7 @@ describe.only('(re)connects with consumer tag', () => {
                 .then(() => {
                     _getConnection(queue, false)
                         .then(conn => {
+                            // conn.close();
                             conn.emit('close', new Error());
                         });
                 });
@@ -105,15 +104,14 @@ describe.only('(re)connects with consumer tag', () => {
                 .then(() => {
                     _getChannel(queue)
                         .then(channel => {
-                            channel.close();
+                            // channel.close();
+                            channel.emit('close', new Error());
                         });
                 });
         });
 
         it('Listens again on Connection close event', function (done) {
             this.timeout(5000);
-            // Use rewire to get un-exported function
-            const _getConnection = AMQP.__get__('_getConnection');
             queue.once('reconnect', () => {
                 queue.once('listen', done);
             });
@@ -121,6 +119,7 @@ describe.only('(re)connects with consumer tag', () => {
                 .then(() => {
                     _getConnection(queue, false)
                         .then(conn => {
+                            // conn.close();
                             conn.emit('close', new Error());
                         });
                 });
