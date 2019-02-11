@@ -11,14 +11,12 @@ const queueOptions = require('../util/constructor');
 
 describe('Publishing to an exchange', () => {
 
-    let options = Object.assign(queueOptions(config), { instanceId: 'A' });
+    let options = Object.assign(queueOptions(config));
     const producer = new AMQPPublisher(options);
 
     let consumer;
-    let counter = 1;
     beforeEach(() => {
-        ++counter;
-        consumer = new AMQPConsumer(Object.assign(queueOptions(config), { instanceId: counter }));
+        consumer = new AMQPConsumer(Object.assign(queueOptions(config)));
     });
 
     afterEach(() => {
