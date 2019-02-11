@@ -5,14 +5,9 @@ const Bluebird = require('bluebird');
 const { AMQPConsumer } = require('../../index');
 const rewire = require('rewire');
 const AMQP = rewire('../../lib/amqp-base');
-const config = require('../config');
 const queueOptions = require('../util/constructor');
 
 describe('Handle connecting & disconnecting', () => {
-
-    let testNum = 0;
-    let config = queueOptions(++testNum);
-    let consumer, producer;
 
     describe('Starting up the queue', () => {
 
@@ -99,6 +94,8 @@ describe('Handle connecting & disconnecting', () => {
         });
 
         it('Reconnects on Channel close event', function (done) {
+            this.timeout(5000);
+
             queue.once('reconnect', () => {
                 queue.stop()
                     .then(done);
@@ -113,8 +110,8 @@ describe('Handle connecting & disconnecting', () => {
         });
 
         it('Reconnects on Connection close event', function (done) {
+            this.timeout(5000);
 
-            this.timeout(50000);
             queue.once('reconnect', () => {
                 queue.stop()
                     .then(done);
@@ -129,6 +126,7 @@ describe('Handle connecting & disconnecting', () => {
         });
 
         it('Listens again on Channel close event', function (done) {
+            this.timeout(5000);
 
             queue.once('reconnect', () => {
                 queue.once('listen', () => {

@@ -9,11 +9,11 @@ const queueOptions = require('../util/constructor');
 describe('Listening to a queue', () => {
 
     let _getChannel = AMQP.__get__('_getChannel');
-    let consumer, producer;
+    let consumer, producer, config;
     let testNum = 0;
 
     beforeEach(() => {
-        let config = queueOptions(++testNum);
+        config = queueOptions(`${++testNum}-publish`);
         consumer = new AMQPConsumer(config);
         producer = new AMQPPublisher(config);
     });
