@@ -14,8 +14,9 @@ describe('Listening to a queue', () => {
     let testNum = 0;
 
     beforeEach(() => {
-        consumer = new AMQPConsumer(queueOptions(++testNum));
-        producer = new AMQPPublisher(queueOptions(++testNum));
+        let config = queueOptions(++testNum);
+        consumer = new AMQPConsumer(config);
+        producer = new AMQPPublisher(config);
     });
 
     afterEach(() => {
