@@ -23,7 +23,7 @@ const { AMQPConsumer, AMQPPublisher } = require('loyalty-amqp-lib');
 
 
 
-The first thing to do is to create a new instance of the `AMQPPublisher` or the `AMQPConsumer`. You need to pass it an options object that contains the configuration for the connection and the name of the queue/exchange to connect to, and specifics such as the route. More details on this can be found in the jsdoc comments for the class constructor in the [consumer](lib/amqp-consumer.js)/[producer](lib/amqp-producer.js).
+The first thing to do is to create a new instance of the `AMQPPublisher` or the `AMQPConsumer`. You need to pass it an options object that contains the configuration for the connection and the name of the queue/exchange to connect to, and specifics such as the route. More details on this can be found in the jsdoc comments for the class constructor in the [consumer](lib/amqp-consumer.js)/[publisher](lib/amqp-publisher.js).
 
 
 ### 1 – Consuming a queue
@@ -46,17 +46,17 @@ await producer.publish(message);
 
 ## Event flows _RabbitMQ_
 
-### Consume, listen on a queue
-— When you listen on a queue, a `message` event is emitted when a message comes in. If listening on a queue succeeds, a `listen` event is emitted, if it fails, an `error` event is emitted.
+### Consume, listen to a queue
+— Once you listen to a queue, a `message` event will be emitted when a message comes in. If listening to a queue succeeds, a `listen` event will be emitted. If listening fails, an `error` event will be emitted.
 
 ### Publish a message
-— When a message fails to be published an `error` event is emitted
+— When a message fails to be published an `error` event will be emitted
 
 ### Close a connection
-— When we close a _ _ _, the connection and channel are closed. When all of this is done, a `close` event is emitted.
+— When we close a _ _ _, the connection and channel are closed. When all of this is done, a `close` event will be emitted.
 
 ### When a channel closes
-When a close event is emitted on a channel, and it has an error, we will emit a `disconnect` event on the base class, recreate the channel, and emit a `reconnect` event.
+When a close event has been emitted on a channel, and the close event has an error, the base class will emit a `disconnect` event, recreate the channel, and then emit a `reconnect` event.
 
 ### List of events
 * base/`connect`
