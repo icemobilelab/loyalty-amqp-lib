@@ -1,10 +1,20 @@
 {
   "name": "@icemobile/loyalty-amqp-lib",
-  "version": "0.0.0",
+  "version": "0.0.2",
   "description": "Common library for connecting to RabbitMQ",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node .",
+    "lint": "eslint lib test config index.js",
+    "integration-test": "nyc mocha --exit 'test/integration/**/*.test.js'",
+    "unit-test": "nyc mocha --exit 'test/unit/**/*.test.js'",
+    "test-watch": "nyc mocha --watch --exit 'test/**/*.test.js'",
+    "test": "npm run up && npm run lint && nyc mocha --exit test/**/*.test.js && npm run down",
+    "debug": "nodemon --ignore 'test/*' --debug=56745 .",
+    "jsdoc": "jsdoc -r lib -R README.md -d doc/jsdoc",
+    "sonarqube": "node test/sonarqube/sonarqube",
+    "up": "docker-compose up --force-recreate --build -d && wait-on -l tcp:localhost:5672 http-get://localhost:15672",
+    "down": "rm -rf ./coverage && docker-compose down && docker-compose kill && docker-compose rm -fv"
   },
   "repository": {
     "type": "git",
@@ -18,5 +28,41 @@
   "bugs": {
     "url": "https://github.com/icemobilelab/loyalty-amqp-lib/issues"
   },
-  "homepage": "https://github.com/icemobilelab/loyalty-amqp-lib#readme"
+  "homepage": "https://github.com/icemobilelab/loyalty-amqp-lib#readme",
+  "dependencies": {
+    "amqplib": "^0.5.3",
+    "bluebird": "^3.5.1",
+    "bluebird-retry": "^0.11.0",
+    "bunyan": "^1.8.12",
+    "convict": "^4.4.1",
+    "locks": "^0.2.2",
+    "lodash": "^4.17.4",
+    "moment": "^2.19.1",
+    "sonarqube-scanner": "^2.0.2",
+    "uuid": "^3.1.0"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "cli-spinner": "^0.2.7",
+    "docker-compose": "^0.4.3",
+    "eslint": "^4.11.0",
+    "husky": "^0.14.3",
+    "jsdoc": "^3.5.5",
+    "loyalty-commons-v4": "git+https://f941381defc64b2588b9f4db8ade0a4896544b6c:x-oauth-basic@github.com/icemobilelab/loyalty-commons-v4.git#develop",
+    "mocha": "^4.0.1",
+    "nyc": "^11.3.0",
+    "rewire": "^4.0.1",
+    "sinon": "^7.2.3",
+    "wait-on": "^3.2.0"
+  },
+  "nyc": {
+    "include": [
+      "lib/**/*.js"
+    ],
+    "reporter": [
+      "text",
+      "text-summary",
+      "lcov"
+    ]
+  }
 }
