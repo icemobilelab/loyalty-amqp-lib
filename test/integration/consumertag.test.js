@@ -18,9 +18,10 @@ function getOptions(serviceName = `consumer-tag-${++counter}`) {
 describe('(re)connects with consumer tag', () => {
 
     let consumer;
-    after(() => {
+    let producer;
+    after((done) => {
         consumer.removeAllListeners();
-        consumer.stop();
+        setTimeout(() => { consumer.stop(); done(); }, 200);
     });
 
     describe('Starting up the queue and listening', () => {
@@ -37,18 +38,17 @@ describe('(re)connects with consumer tag', () => {
         });
 
         it('Listens to message events', async function () {
-            this.timeout(10000);
+            this.timeout(10000);;
             const message = 'hello world';
             const options = getOptions('ctag-publisher');
-            const producer = new AMQPPublisher(options);
+            const AMQPPublisher = rewire('../../lib/amqp-publisher');
+            producer = new AMQPPublisher(options);
             consumer = new AMQPConsumer(options);
-            after(() => {
-                producer.stop();
-            });
 
             return await new Promise(async (resolve) => {
                 consumer.once('message', msg => {
                     expect(message).to.be.eql(msg);
+                    consumer.stop();
                     resolve();
                 });
                 await consumer.listen();
@@ -96,8 +96,8 @@ describe('(re)connects with consumer tag', () => {
         it('Listens again on Channel close event', function (done) {
             this.timeout(5000);
             const options = getOptions('ctag-reconnect-publisher');
-            const producer = new AMQPPublisher(options);
             consumer = new AMQPConsumer(options);
+            const producer = new AMQPPublisher(options);
             const message = 'Test message';
 
             consumer.once('reconnect', () => {
@@ -105,6 +105,8 @@ describe('(re)connects with consumer tag', () => {
                     producer.publish(message);
                     consumer.once('message', msg => {
                         expect(message, 'Received the wrong message').to.eql(msg);
+                        consumer.stop();
+                        producer.stop();
                         done();
                     });
                 });
