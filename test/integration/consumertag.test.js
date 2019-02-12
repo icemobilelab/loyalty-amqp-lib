@@ -20,8 +20,13 @@ describe('(re)connects with consumer tag', () => {
     let consumer;
     let producer;
     after((done) => {
-        consumer.removeAllListeners();
-        setTimeout(() => { consumer.stop(); done(); }, 200);
+        setTimeout(() => {
+            if (consumer) {
+                consumer.removeAllListeners();
+                consumer.stop();
+            }
+            done();
+        }, 200);
     });
 
     describe('Starting up the queue and listening', () => {
@@ -136,6 +141,39 @@ describe('(re)connects with consumer tag', () => {
                             conn.emit('close', new Error());
                         });
                 });
+        });
+    });
+
+    describe('Subscribing to multiple queues with the same consumer tag', () => {
+
+        it('Connects to multiple queues with same consumer tag', async function () {
+            this.timeout(10000);
+
+            let options = getOptions('ctag-multi-listener');
+            options.serviceName = 'ctag-busy-service';
+            const nrConsumers = 3;
+            let consumers = [];
+            for (let i = 0; i < nrConsumers; i++) {
+                consumers.push(new AMQPConsumer(options));
+            }
+            let count = 0;
+
+
+            return await new Promise(async (resolve) => {
+                function resolver(resolve) {
+                    if (++count === nrConsumers) {
+                        resolve();
+                        consumers.forEach((consumer) => {
+                            consumer.stop();
+                        });
+                    }
+                }
+
+                for (let consumer of consumers) {
+                    consumer.once('listen', resolver.bind(this, resolve));
+                    consumer.listen();
+                }
+            });
         });
     });
 });
