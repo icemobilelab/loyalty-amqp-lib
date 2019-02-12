@@ -83,7 +83,7 @@ describe('Handle connecting & disconnecting', () => {
         });
     });
 
-    describe('Handles AMQP disconnects', () => {
+    describe.only('Handles AMQP disconnects', () => {
         // Use rewire to get un-exported function
         const _getConnection = AMQP.__get__('_getConnection');
         const { _getChannel } = require('../../lib/amqp-base');
@@ -93,17 +93,23 @@ describe('Handle connecting & disconnecting', () => {
             queue = new AMQPConsumer(queueOptions('handlesDisconnects'));
         });
 
+        afterEach(() => {
+            // when a channel is closing, it takes some time before it has
+            // actually been closed, calling .stop() on a queue will try
+            // and close the already closing channel, this timeout prevents that.
+            setTimeout(() => { queue.stop(); }, 200);
+        });
+
         it('Reconnects on Channel close event', function (done) {
             this.timeout(5000);
 
             queue.once('reconnect', () => {
-                queue.stop()
-                    .then(done);
+                done();
             });
             queue.listen()
                 .then(() => {
                     _getChannel(queue)
-                        .then(channel => {
+                        .then((channel) => {
                             channel.close();
                         });
                 });
@@ -113,8 +119,7 @@ describe('Handle connecting & disconnecting', () => {
             this.timeout(5000);
 
             queue.once('reconnect', () => {
-                queue.stop()
-                    .then(done);
+                done();
             });
             queue.listen()
                 .then(() => {
