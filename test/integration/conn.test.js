@@ -97,6 +97,8 @@ describe('Handle connecting & disconnecting', () => {
             // when a channel is closing, it takes some time before it has
             // actually been closed, calling .stop() on a queue will try
             // and close the already closing channel, this timeout prevents that.
+            // channel.close() does return a promise, but it resolves before
+            // the channel has actually been closed(!)
             setTimeout(() => { queue.stop(); }, 200);
         });
 
