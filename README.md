@@ -23,7 +23,7 @@ const { AMQPConsumer, AMQPPublisher } = require('loyalty-amqp-lib');
 
 
 
-The first thing to do is to create a new instance of the `AMQPPublisher` or the `AMQPConsumer`. You need to pass it an options object that contains the configuration for the connection and the name of the queue/exchange to connect to, and specifics such as the route. More details on this can be found in the jsdoc comments for the class constructor in the [consumer](lib/amqp-consumer)/[producer](lib/amqp-producer).
+The first thing to do is to create a new instance of the `AMQPPublisher` or the `AMQPConsumer`. You need to pass it an options object that contains the configuration for the connection and the name of the queue/exchange to connect to, and specifics such as the route. More details on this can be found in the jsdoc comments for the class constructor in the [consumer](lib/amqp-consumer.js)/[producer](lib/amqp-producer.js).
 
 
 ### 1 – Consuming a queue
