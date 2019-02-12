@@ -156,7 +156,12 @@ describe('(re)connects with consumer tag', () => {
 
             return await new Promise(async (resolve) => {
                 function resolver(resolve) {
-                    if (++count === nrConsumers) { resolve(); }
+                    if (++count === nrConsumers) {
+                        resolve();
+                        consumers.forEach((consumer) => {
+                            consumer.stop();
+                        });
+                    }
                 }
 
                 for (let consumer of consumers) {
