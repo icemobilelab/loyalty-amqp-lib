@@ -21,8 +21,7 @@ describe('Listening to a queue', () => {
     afterEach((done) => {
         if (consumer) {
             consumer.removeAllListeners();
-            setTimeout(() => { consumer.stop(); done(); }, 200);
-
+            setTimeout(() => { consumer.stop(); done(); }, 500);
         }
     });
 
