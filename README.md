@@ -50,7 +50,7 @@ await producer.publish(message);
 — When a message fails to be published an `error` event is emitted
 
 ### Close a connection
-— When we close a _ _ _, the connection and channel are closed. When all of this is done, a `close` event is emitted.
+— When we call `stop()` on an instance of the consumer or publisher, the connection and channel are closed. When all of this is done, a `close` event is emitted.
 
 ### When a channel closes
 When a close event is emitted on a channel, and it has an error, we will emit a `disconnect` event on the base class, recreate the channel, and emit a `reconnect` event.
