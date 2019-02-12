@@ -40,6 +40,10 @@ describe('_connect', () => {
     });
 
     it('Emits disconnect event', function (done) {
+        const AMQP = rewire('../../../lib/amqp-base');
+        base = new AMQP.AMQP(constructor(config));
+        const _connect = AMQP.__get__('_connect');
+
         base.once('disconnect', done);
         _connect(base)
             .then((conn) => {
