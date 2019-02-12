@@ -83,7 +83,7 @@ describe('Handle connecting & disconnecting', () => {
         });
     });
 
-    describe.only('Handles AMQP disconnects', () => {
+    describe('Handles AMQP disconnects', () => {
         // Use rewire to get un-exported function
         const _getConnection = AMQP.__get__('_getConnection');
         const { _getChannel } = require('../../lib/amqp-base');
