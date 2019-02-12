@@ -153,9 +153,7 @@ describe('(re)connects with consumer tag', () => {
             let options = getOptions('ctag-multi-listener');
             options.serviceName = 'ctag-busy-service';
             const nrConsumers = 3;
-            let consumers = [...Array(nrConsumers)].map(() => {
-                new AMQPConsumer(options);
-            });
+            const consumers = [...Array(nrConsumers)].map(() => new AMQPConsumer(options));
 
             // Confirm all calls made before resolving
             let count = 0;
