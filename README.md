@@ -4,6 +4,9 @@ Common library for connecting to _RabbitMQ_
 
 
 ## About loyalty-amqp-lib
+The library allows you to consume (listen to) messages from a _RabbitMQ_ queue, or to publish a message to a _RabbitMQ_ exchange.
+
+
 The functionality in this library used to be part of the https://github.com/icemobilelab/loyalty-commons-v4 package. The _RabbitMQ_ functionality has moved into its own package, and is now properly versioned (semver) and hosted in a private NPM registry.
  
 
@@ -11,6 +14,7 @@ The functionality in this library used to be part of the https://github.com/ice
 
 
 ## Usage of the common _RabbitMQ_ library
+
 Using the library is straightforward, once you’ve added it as a dependency in your project, you can import/require it into your code:
 
 ```javascript
@@ -18,9 +22,8 @@ const { AMQPConsumer, AMQPPublisher } = require('loyalty-amqp-lib');
 ```
 
 
-The library allows you to consume (listen to) messages from a _RabbitMQ_ queue, or to publish a message to a _RabbitMQ_ exchange.
 
-The first thing to do is to create a new instance of the `AMQPPublisher` or the `AMQPConsumer`. You need to pass it an options object that contains the configuration for the connection and the name of the queue/exchange to connect to, and specifics such as the route. More details on this can be found in the jsdoc comments alongside the class constructor.
+The first thing to do is to create a new instance of the `AMQPPublisher` or the `AMQPConsumer`. You need to pass it an options object that contains the configuration for the connection and the name of the queue/exchange to connect to, and specifics such as the route. More details on this can be found in the jsdoc comments for the class constructor in the [consumer](lib/amqp-consumer.js)/[producer](lib/amqp-producer.js).
 
 
 ### 1 – Consuming a queue

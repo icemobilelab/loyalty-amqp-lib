@@ -149,23 +149,25 @@ describe('(re)connects with consumer tag', () => {
         it('Connects to multiple queues with same consumer tag', async function () {
             this.timeout(10000);
 
+            // Setup multiple consumers
             let options = getOptions('ctag-multi-listener');
             options.serviceName = 'ctag-busy-service';
             const nrConsumers = 3;
             const consumers = [...Array(nrConsumers)].map(() => new AMQPConsumer(options));
+
+            // Confirm all calls made before resolving
             let count = 0;
-
-
-            return await new Promise(async (resolve) => {
-                function resolver(resolve) {
-                    if (++count === nrConsumers) {
-                        resolve();
-                        consumers.forEach(consumer => {
-                            consumer.stop();
-                        });
-                    }
+            function resolver(resolve) {
+                if (++count === nrConsumers) {
+                    resolve();
+                    consumers.forEach(consumer => {
+                        consumer.stop();
+                    });
                 }
+            }
 
+            // Resolve after all consumers issue listen event
+            return await new Promise(async (resolve) => {
                 for (let consumer of consumers) {
                     consumer.once('listen', resolver.bind(this, resolve));
                     consumer.listen();
