@@ -1,6 +1,6 @@
 {
   "name": "@icemobile/loyalty-amqp-lib",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Common library for connecting to RabbitMQ",
   "main": "index.js",
   "scripts": {
