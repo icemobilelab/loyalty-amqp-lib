@@ -18,10 +18,11 @@ describe('Listening to a queue', () => {
         producer = new AMQPPublisher(config);
     });
 
-    afterEach(() => {
+    afterEach((done) => {
         if (consumer) {
             consumer.removeAllListeners();
-            consumer.stop();
+            setTimeout(() => { consumer.stop(); done(); }, 200);
+
         }
     });
 
