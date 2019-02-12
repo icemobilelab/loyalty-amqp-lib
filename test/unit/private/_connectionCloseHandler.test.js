@@ -24,7 +24,12 @@ describe('_connectionCloseHandler', () => {
     it('expect to reconnect on close when error is passed', (done) => {
         const connectCallback = sinon.fake.resolves('mock-mock');
         AMQP.__set__('_connect', connectCallback);
-        const base = { emit: sinon.fake(), logger: mockLogger };
+        const lock = {
+            readLock: function () {
+                return Promise.resolve();
+            }
+        };
+        const base = { emit: sinon.fake(), logger: mockLogger, lock };
         _connectionCloseHandler(base, err);
         expect(base.emit.callCount).to.equal(1);
         done();
