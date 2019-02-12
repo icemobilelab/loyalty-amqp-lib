@@ -163,7 +163,9 @@ describe('(re)connects with consumer tag', () => {
                 function resolver(resolve) {
                     if (++count === nrConsumers) {
                         resolve();
-
+                        consumers.forEach(consumer => {
+                            consumer.stop();
+                        });
                     }
                 }
 
