@@ -53,7 +53,7 @@ await producer.publish(message);
 — When a message fails to be published an `error` event will be emitted
 
 ### Close a connection
-— When we call `stop()` on an instance of the consumer or publisher, the connection and channel are closed. When all of this is done, a `close` event is emitted.
+— When we call `stop()` on an instance of the consumer or publisher, the connection and channel are closed. When both the channel and connection have closed, a `close` event will be emitted.
 
 ### When a channel closes
 When a close event has been emitted on a channel, and the close event has an error, the base class will emit a `disconnect` event, recreate the channel, and then emit a `reconnect` event.
@@ -122,7 +122,8 @@ Publishing (happy flow)
 
 Publishing (unhappy flow)
 
-`connect`
+`connect` |
+`error`
 
 
 
@@ -137,5 +138,5 @@ Publish
 * When there is an error in creating the connection and `maxTries` is set (to anything other than `-1`), the error will propagate to the `publish()` method.
 
 
-The library does __NOT__ emit a close even when the channel or connection is closed.
-The library will automatically attempt to reconnect and emit a `reconnect` event when successful.
+The library does __NOT__ emit a close event when the channel or connection is closed.
+The library will automatically attempt to reconnect. It will emit a `reconnect` event once it does.
