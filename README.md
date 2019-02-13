@@ -139,4 +139,4 @@ Publish
 
 
 The library does __NOT__ emit a close event when the channel or connection is closed.
-The library will automatically attempt to reconnect. It will emit a `reconnect` event once it does.
+It __will__ emit a `disconnect` event. The library will automatically attempt to reconnect. It will emit a `reconnect` event once it does.
