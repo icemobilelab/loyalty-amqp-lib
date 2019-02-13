@@ -32,13 +32,13 @@ pipeline {
       }
     }
 
-   stage('Git Status Pending') {
-    steps {
-      script {
-          setGithubStatus(projectName, GIT_COMMIT, BUILD_URL, "Code Quality", true);
-        }
-      }
-    }
+  //  stage('Git Status Pending') {
+  //   steps {
+  //     script {
+  //         setGithubStatus(projectName, GIT_COMMIT, BUILD_URL, "Code Quality", true);
+  //       }
+  //     }
+  //   }
 
     // stage('Run Unit Tests') {
     //   steps {
