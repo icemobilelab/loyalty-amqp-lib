@@ -65,5 +65,9 @@
       "text-summary",
       "lcov"
     ]
+  },
+  "directories": {
+    "lib": "lib",
+    "test": "test"
   }
 }

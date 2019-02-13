@@ -40,59 +40,59 @@ pipeline {
       }
     }
 
-    stage('Run Unit Tests') {
-      steps {
-        script {
-          unitTestJS();
-        }
-      }
-    }
+    // stage('Run Unit Tests') {
+    //   steps {
+    //     script {
+    //       unitTestJS();
+    //     }
+    //   }
+    // }
 
-    stage('Run Integration test') {
-      steps {
-        script {
-          // Temporary - remove these and set in environment
-          env.AMQP_HOST="loyalty-rabbitmq.loyalty-dev.svc"
-          env.AMQP_USERNAME="icemobile1"
-          env.AMQP_PASSWORD="cgtbC1CdNaVd"
+    // stage('Run Integration test') {
+    //   steps {
+    //     script {
+    //       // Temporary - remove these and set in environment
+    //       env.AMQP_HOST="loyalty-rabbitmq.loyalty-dev.svc"
+    //       env.AMQP_USERNAME="icemobile1"
+    //       env.AMQP_PASSWORD="cgtbC1CdNaVd"
 
-          env.AMQP_QUEUE="libtest-queue"
-          env.AMQP_EXCHANGE="libtest-exchange"
-          env.AMQP_EXCHANGE_TYPE="libtest-topic"
-          env.AMQP_ROUTE="libtest-route"
-          env.LOG_LEVEL="error"
+    //       env.AMQP_QUEUE="libtest-queue"
+    //       env.AMQP_EXCHANGE="libtest-exchange"
+    //       env.AMQP_EXCHANGE_TYPE="libtest-topic"
+    //       env.AMQP_ROUTE="libtest-route"
+    //       env.LOG_LEVEL="error"
 
-          IntegrationTestJS();
-        }
-      }
-    }
+    //       IntegrationTestJS();
+    //     }
+    //   }
+    // }
 
-    stage('ESLint & Sonarcloud') {
-     steps {
-       script {
-          CodeQualityChecks();
-       }
-     }
-    }
+    // stage('ESLint & Sonarcloud') {
+    //  steps {
+    //    script {
+    //       CodeQualityChecks();
+    //    }
+    //  }
+    // }
 
-    stage('Publish To Registry') {
-      when {
-        expression { return gitBranch == 'master' }
-      }
+    // stage('Publish To Registry') {
+    //   when {
+    //     expression { return gitBranch == 'master' }
+    //   }
 
-      steps {
-        script {
-          publishToNPM();
-        }
-      }
-    }
+    //   steps {
+    //     script {
+    //       publishToNPM();
+    //     }
+    //   }
+    // }
 
-    stage('Git Status Quality Tests') {
-      steps {
-        script {
-          setGithubStatus(projectName, GIT_COMMIT, BUILD_URL, "Code Quality");
-        }
-      }
-    }
+    // stage('Git Status Quality Tests') {
+    //   steps {
+    //     script {
+    //       setGithubStatus(projectName, GIT_COMMIT, BUILD_URL, "Code Quality");
+    //     }
+    //   }
+    // }
   }
 }
