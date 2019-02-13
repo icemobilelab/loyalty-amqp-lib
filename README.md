@@ -140,3 +140,7 @@ Publish
 
 The library does __NOT__ emit a `close` event when the channel or connection is closed.
 It __WILL__ emit a `disconnect` event. The library will automatically attempt to reconnect. It will emit a `reconnect` event once it has.
+
+JIMJIM Adding text to trigger build JIMJIM
+
+
