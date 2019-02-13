@@ -30,10 +30,10 @@ The first thing to do is to create a new instance of the `AMQPPublisher` or the 
 
 ```javascript
 const consumer = new AMQPConsumer(options);
-await consumer.listen();
 consumer.on('message', message => {
-    // do your magic.
+    // do your magic.
 });
+await consumer.listen();
 ```
 
 ### 2 – Publishing to an exchange
@@ -47,13 +47,13 @@ await producer.publish(message);
 ## Event flows _RabbitMQ_
 
 ### Consume, listen to a queue
-— Once you listen to a queue, a `message` event will be emitted when a message comes in. If listening to a queue succeeds, a `listen` event will be emitted. If listening fails, an `error` event will be emitted.
+— If listening to a queue succeeds, a `listen` event will be emitted. If listening fails, an `error` event will be emitted. Once you are listening to a queue, a `message` event will be emitted when a message comes in.
 
 ### Publish a message
 — When a message fails to be published an `error` event will be emitted
 
 ### Close a connection
-— When we call `stop()` on an instance of the consumer or publisher, the connection and channel are closed. When both the channel and connection have closed, a `close` event will be emitted.
+— When we call `stop()` on an instance of the consumer or publisher, the connection and channel are closed. Once both the channel and connection have closed, a `close` event will be emitted.
 
 ### When a channel closes
 When a close event has been emitted on a channel, and the close event has an error, the base class will emit a `disconnect` event, recreate the channel, and then emit a `reconnect` event.
@@ -138,5 +138,5 @@ Publish
 * When there is an error in creating the connection and `maxTries` is set (to anything other than `-1`), the error will propagate to the `publish()` method.
 
 
-The library does __NOT__ emit a close event when the channel or connection is closed.
-The library will automatically attempt to reconnect. It will emit a `reconnect` event once it does.
+The library does __NOT__ emit a `close` event when the channel or connection is closed.
+It __WILL__ emit a `disconnect` event. The library will automatically attempt to reconnect. It will emit a `reconnect` event once it has.

@@ -7,13 +7,14 @@ module.exports = function queueOptions(input = 'test-name') {
     const exchange = `${input}.exchange`;
 
     return {
-        // serviceName: `amqp-${new Date().toISOString()}`,
+        serviceName: `${input}`,
         host: config.get('amqp.host'),
         username: config.get('amqp.username'),
         password: config.get('amqp.password'),
         retry: config.get('amqp.retry'),
         exchangeType: config.get('amqp.exchangeType'),
         route: config.get('amqp.route'),
+        deadLetterExchange: `${exchange}.dle`,
         queue,
         exchange,
         logger
