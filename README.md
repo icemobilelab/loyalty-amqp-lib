@@ -30,10 +30,10 @@ The first thing to do is to create a new instance of the `AMQPPublisher` or the 
 
 ```javascript
 const consumer = new AMQPConsumer(options);
-await consumer.listen();
 consumer.on('message', message => {
-    // do your magic.
+    // do your magic.
 });
+await consumer.listen();
 ```
 
 ### 2 – Publishing to an exchange
