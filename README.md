@@ -138,5 +138,5 @@ Publish
 * When there is an error in creating the connection and `maxTries` is set (to anything other than `-1`), the error will propagate to the `publish()` method.
 
 
-The library does __NOT__ emit a close event when the channel or connection is closed.
-It __will__ emit a `disconnect` event. The library will automatically attempt to reconnect. It will emit a `reconnect` event once it does.
+The library does __NOT__ emit a `close` event when the channel or connection is closed.
+It __WILL__ emit a `disconnect` event. The library will automatically attempt to reconnect. It will emit a `reconnect` event once it does.
