@@ -2,7 +2,6 @@
 Common library for connecting to _RabbitMQ_
 
 
-
 ## About loyalty-amqp-lib
 The library allows you to consume (listen to) messages from a _RabbitMQ_ queue, or to publish a message to a _RabbitMQ_ exchange.
 
@@ -140,7 +139,3 @@ Publish
 
 The library does __NOT__ emit a `close` event when the channel or connection is closed.
 It __WILL__ emit a `disconnect` event. The library will automatically attempt to reconnect. It will emit a `reconnect` event once it has.
-
-JIMJIM removing text to trigger build JIMJIM
-
-
