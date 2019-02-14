@@ -54,3 +54,9 @@ temp
 .test.tmp
 
 prettier.config.js
+
+# Visual Studio
+.vscode
+
+# Log
+log
