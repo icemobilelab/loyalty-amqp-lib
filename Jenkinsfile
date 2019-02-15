@@ -77,7 +77,10 @@ pipeline {
 
     stage('Publish To Registry') {
       when {
-        expression { return gitBranch == 'master' }
+        anyOf {
+          expression { return gitBranch == 'master' }
+          expression { return gitBranch == 'develop' }
+        }
       }
 
       steps {
