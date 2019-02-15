@@ -58,7 +58,7 @@ pipeline {
 
           env.AMQP_QUEUE="libtest-queue"
           env.AMQP_EXCHANGE="libtest-exchange"
-          env.AMQP_EXCHANGE_TYPE="libtest-topic"
+          env.AMQP_EXCHANGE_TYPE="topic"
           env.AMQP_ROUTE="libtest-route"
           env.LOG_LEVEL="error"
 
