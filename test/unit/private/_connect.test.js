@@ -41,10 +41,21 @@ describe('_connect', () => {
 
     it('Emits disconnect event', function (done) {
         const AMQP = rewire('../../../lib/amqp-base');
+        const resolve = AMQP.__set__('_createConnection', () => {
+            let result = new EventEmitter();
+            result.createChannel = () => {
+                return Promise.resolve(result);
+            };
+            return Promise.resolve(result);
+        });
         base = new AMQP.AMQP(constructor(config));
         const _connect = AMQP.__get__('_connect');
 
-        base.once('disconnect', done);
+        base.once('disconnect', () => {
+            resolve();
+            done();
+        });
+
         _connect(base)
             .then((conn) => {
                 conn.emit('close', new Error);
