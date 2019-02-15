@@ -76,13 +76,6 @@ pipeline {
     }
 
     stage('Publish To Registry') {
-      when {
-        anyOf {
-          expression { return gitBranch == 'master' }
-          expression { return gitBranch == 'develop' }
-        }
-      }
-
       steps {
         script {
           publishToNPM();
