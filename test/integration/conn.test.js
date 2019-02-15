@@ -99,7 +99,7 @@ describe('Handle connecting & disconnecting', () => {
             // and close the already closing channel, this timeout prevents that.
             // channel.close() does return a promise, but it resolves before
             // the channel has actually been closed(!)
-            setTimeout(() => { queue.stop(); }, 200);
+            setTimeout(() => { queue.stop(); }, 400);
         });
 
         it('Reconnects on Channel close event', function (done) {
