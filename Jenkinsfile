@@ -43,17 +43,6 @@ pipeline {
     stage('Run Unit Tests') {
       steps {
         script {
-          // Temporary - remove these and set in environment
-          // env.AMQP_HOST="loyalty-rabbitmq.loyalty-dev.svc"
-          // env.AMQP_USERNAME="icemobile1"
-          // env.AMQP_PASSWORD="cgtbC1CdNaVd"
-
-          // env.AMQP_QUEUE="libtest-queue"
-          // env.AMQP_EXCHANGE="libtest-exchange"
-          // env.AMQP_EXCHANGE_TYPE="libtest-topic"
-          // env.AMQP_ROUTE="libtest-route"
-          // env.LOG_LEVEL="error"
-
           unitTestJS();
         }
       }
@@ -65,7 +54,7 @@ pipeline {
           // Temporary - remove these and set in environment
           env.AMQP_HOST="loyalty-rabbitmq.loyalty-dev.svc"
           env.AMQP_USERNAME="icemobile1"
-          env.AMQP_PASSWORD="cgtbC1CdNaVd"
+          env.AMQP_PASSWORD="ve6i5JG005DqBIvP"
 
           env.AMQP_QUEUE="libtest-queue"
           env.AMQP_EXCHANGE="libtest-exchange"
