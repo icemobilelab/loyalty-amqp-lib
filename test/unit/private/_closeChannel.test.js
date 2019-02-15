@@ -29,16 +29,14 @@ describe('_closeChannel', () => {
     });
 
     it('should remove listeners on channel', async function () {
+        const channel = base._channel;
+        function namedListener() {};
+        channel.on('close', namedListener);
+        channel.on('error', namedListener);
+
         await _closeChannel(base);
+        expect(base._channel).to.be.undefined;
         expect(channel.listenerCount('close')).to.equal(0);
         expect(channel.listenerCount('error')).to.equal(0);
     });
-
-    it('should be unable to assert queue on closed channel', async function () {
-        await _closeChannel(base);
-        channel.assertQueue('should-not-be-possible').catch(err => {
-            expect(err.message).to.equal('Channel closed');
-        });
-    });
-
 });

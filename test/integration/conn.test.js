@@ -11,6 +11,15 @@ describe('Handle connecting & disconnecting', () => {
 
     describe('Starting up the queue', () => {
 
+        it('check created channel health', async function () {
+            const _createChannel = AMQP.__get__('_createChannel');
+            const base = new AMQP.AMQP(queueOptions('checkChannel'));
+            const channel = await _createChannel(base, false);
+
+            expect(channel).to.deep.equal(base._channel);
+            return channel.checkExchange('amq.direct');
+        });
+
         it('Retries connection to the AMQP server with maxTries', function (done) {
             this.timeout(50000);
             let queue = new AMQPConsumer(queueOptions('maxTries'));
@@ -79,6 +88,21 @@ describe('Handle connecting & disconnecting', () => {
             queue.listen()
                 .then(() => {
                     queue.stop();
+                });
+        });
+
+        it('should be unable to assert queue on closed channel', async function () {
+            const _closeChannel = AMQP.__get__('_closeChannel');
+            const _getChannel = AMQP.__get__('_getChannel');
+
+            const base = new AMQP.AMQP(queueOptions('checkChannelFail'));
+            const channel = await _getChannel(base);
+
+            await _closeChannel(base);
+            channel.assertQueue('should-not-be-possible')
+                .then(() => { throw new Error(); })
+                .catch(err => {
+                    expect(err.message).to.contain('Channel closed');
                 });
         });
     });
