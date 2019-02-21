@@ -25,6 +25,10 @@ describe('(re)connects with consumer tag', () => {
                 consumer.removeAllListeners();
                 consumer.stop();
             }
+            if (producer) {
+                producer.removeAllListeners();
+                producer.stop();
+            }
             done();
         }, 200);
     });
@@ -39,6 +43,55 @@ describe('(re)connects with consumer tag', () => {
             return await new Promise(async (resolve) => {
                 consumer.once('listen', resolve);
                 consumer.listen();
+            });
+        });
+
+        it('Connects to the broker with producer/consumer using same consumer tag', async function () {
+            this.timeout(10000);
+
+            const options = getOptions('ctag-listener');
+            consumer = new AMQPConsumer(options);
+            producer = new AMQPPublisher(options);
+
+            const consumerListener = new Promise(async (resolve) => {
+                consumer.once('listen', resolve);
+                consumer.listen();
+            });
+            const producerConnection = new Promise(async (resolve) => {
+                producer.once('connect', resolve);
+                producer.publish('test');
+            });
+
+            return await Promise.all([
+                consumerListener,
+                producerConnection
+            ]);
+        });
+
+        it('Connects to the broker with multiple instances using same consumer tag', async function () {
+            this.timeout(10000);
+
+            const options = getOptions('ctag-listener');
+            consumer = new AMQPConsumer(options);
+            const consumer2 = new AMQPConsumer(options);
+
+            const consumerListener = new Promise(async (resolve) => {
+                consumer.once('listen', resolve);
+                consumer.listen();
+            });
+            const consumerListener2 = new Promise(async (resolve) => {
+                consumer2.once('listen', resolve);
+                consumer2.listen();
+            });
+
+            return await Promise.all([
+                consumerListener,
+                consumerListener2
+            ]);
+
+            after(() => {
+                consumer2.removeAllListeners();
+                consumer2.stop();
             });
         });
 
