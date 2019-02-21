@@ -11,6 +11,9 @@ The versioning rules are described on http://semver.org/
 ## Loyalty AMQP Library Changelog
 
 
+### 1.0.2
+* Simplify variable names
+
 ### 1.0.1
 * Published to NPM
 
