@@ -10,11 +10,13 @@ const constructor = require('../../util/constructor');
 describe('_connect', () => {
 
     const connection = new EventEmitter();
+    connection.close = () => Promise.resolve();
+    connection.checkExchange = () => Promise.resolve();
+    connection.createChannel = () => Promise.resolve(connection);
     AMQP.__set__('_createConnection', () => {
         return Promise.resolve(connection);
     });
     const _connect = AMQP.__get__('_connect');
-
     let base;
     beforeEach(function () {
         base = new AMQP.AMQP(constructor(config));
@@ -40,26 +42,13 @@ describe('_connect', () => {
     });
 
     it('Emits disconnect event', function (done) {
-        const AMQP = rewire('../../../lib/amqp-base');
-        const resolve = AMQP.__set__('_createConnection', () => {
-            let result = new EventEmitter();
-            result.close = () => Promise.resolve();
-            result.createChannel = () => {
-                return Promise.resolve(result);
-            };
-            return Promise.resolve(result);
-        });
-        base = new AMQP.AMQP(constructor(config));
-        const _connect = AMQP.__get__('_connect');
-
         base.once('disconnect', () => {
-            resolve();
             done();
         });
 
         _connect(base)
             .then((conn) => {
-                conn.emit('close', new Error);
+                conn.emit('close', new Error('test error'));
             });
     });
 
