@@ -65,5 +65,78 @@ describe('Listening to a queue', () => {
     });
 
 
+    it('Acknowledging a message ', async function () {
+
+        const message = 'hello world';
+
+        return await new Promise(async (resolve) => {
+            await consumer.listen();
+            consumer.once('message', async (msg, data) => {
+                expect(message).to.be.eql(msg);
+                consumer.acknowledgeMessage(data);
+                resolve();
+            });
+            await producer.publish(message);
+        });
+
+    });
+
+    it('Acknowledging an already acknowledged message ', async function () {
+
+        const message = 'hello world';
+
+        return await new Promise(async (resolve) => {
+            await consumer.listen();
+            consumer.once('disconnect', resolve);
+            consumer.once('message', async (msg, data) => {
+                expect(message).to.be.eql(msg);
+                consumer.acknowledgeMessage(data);
+                consumer.acknowledgeMessage(data);
+
+            });
+            await producer.publish(message);
+        });
+
+    });
+
+    it.only('Rejecting a message ', async function () {
+
+        const message = 'hello world';
+        // config.queue = config.deadLetterExchange;
+        // const deadLetterConsumer = new AMQPConsumer(config);
+        // await deadLetterConsumer.listen();
+        // deadLetterConsumer.once('message', msg => {
+        //     expect(message).to.be.eql(msg);
+        //     resolve();
+        // });
+
+        return await new Promise(async (resolve) => {
+            await consumer.listen();
+
+            consumer.once('message', async (msg, data) => {
+                expect(message).to.be.eql(msg);
+                consumer.rejectMessage(data);
+            });
+            await producer.publish(message);
+        });
+
+    });
+
+    it('Rejecting an already rejected message ', async function () {
+
+        const message = 'hello world';
+
+        return await new Promise(async (resolve) => {
+            await consumer.listen();
+            consumer.once('disconnect', resolve);
+            consumer.once('message', async (msg, data) => {
+                expect(message).to.be.eql(msg);
+                consumer.rejectMessage(data);
+                consumer.rejectMessage(data);
+            });
+            await producer.publish(message);
+        });
+
+    });
 
 });
