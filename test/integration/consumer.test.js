@@ -102,15 +102,16 @@ describe('Listening to a queue', () => {
     it.only('Rejecting a message ', async function () {
 
         const message = 'hello world';
-        // config.queue = config.deadLetterExchange;
-        // const deadLetterConsumer = new AMQPConsumer(config);
-        // await deadLetterConsumer.listen();
-        // deadLetterConsumer.once('message', msg => {
-        //     expect(message).to.be.eql(msg);
-        //     resolve();
-        // });
+        config.queue = config.deadLetterExchange;
+        config.deadLetterExchange = 'second-dl';
+        const deadLetterConsumer = new AMQPConsumer(config);
 
         return await new Promise(async (resolve) => {
+            deadLetterConsumer.once('message', msg => {
+                expect(message).to.be.eql(msg);
+                resolve();
+            });
+            await deadLetterConsumer.listen();
             await consumer.listen();
 
             consumer.once('message', async (msg, data) => {
