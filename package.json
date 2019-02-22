@@ -13,7 +13,7 @@
     "debug": "nodemon --ignore 'test/*' --debug=56745 .",
     "jsdoc": "jsdoc -r lib -R README.md -d doc/jsdoc",
     "sonarqube": "node test/sonarqube/sonarqube",
-    "up": "docker-compose up --force-recreate --build -d && wait-on -l tcp:localhost:5672 http-get://localhost:15672",
+    "up": "docker-compose up -d && wait-on -l tcp:localhost:5672 http-get://localhost:15672",
     "down": "rm -rf ./coverage && docker-compose down && docker-compose kill && docker-compose rm -fv"
   },
   "repository": {
