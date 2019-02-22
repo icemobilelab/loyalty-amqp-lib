@@ -11,6 +11,9 @@ The versioning rules are described on http://semver.org/
 ## Loyalty AMQP Library Changelog
 
 
+### 1.1.0
+* Add ack/nack functionality
+
 ### 1.0.3
 * Set default type for exchanges to 'topic'
 
