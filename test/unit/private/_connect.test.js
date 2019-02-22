@@ -43,6 +43,7 @@ describe('_connect', () => {
         const AMQP = rewire('../../../lib/amqp-base');
         const resolve = AMQP.__set__('_createConnection', () => {
             let result = new EventEmitter();
+            result.close = () => Promise.resolve();
             result.createChannel = () => {
                 return Promise.resolve(result);
             };
