@@ -14,7 +14,7 @@ module.exports = function queueOptions(input = 'test-name') {
         retry: config.get('amqp.retry'),
         exchangeType: config.get('amqp.exchangeType'),
         route: config.get('amqp.route'),
-        deadLetterExchange: `${exchange}.dle`,
+        deadLetterExchange: `${input}.dl`,
         queue,
         exchange,
         logger
