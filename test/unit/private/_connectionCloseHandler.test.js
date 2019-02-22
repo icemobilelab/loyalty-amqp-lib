@@ -10,7 +10,7 @@ const mockLogger = require('../../util/mock-logger');
 describe('_connectionCloseHandler', () => {
 
     const _connectionCloseHandler = AMQP.__get__('_connectionCloseHandler');
-    const err = new Error('yikes');
+    const err = new Error('test error');
 
     it('expect disconnect event to be emitted on base when error is passed', (done) => {
         const base = { emit: sinon.fake(), logger: mockLogger };
