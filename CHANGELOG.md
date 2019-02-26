@@ -11,6 +11,9 @@ The versioning rules are described on http://semver.org/
 ## Loyalty AMQP Library Changelog
 
 
+### 1.2.0
+* Change argument from 'noAck' to 'ackMsgs' (flip the bool)
+
 ### 1.1.1
 * Bugfixes for ack/nack functionality
 
