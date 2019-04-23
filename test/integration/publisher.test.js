@@ -5,8 +5,6 @@ const rewire = require('rewire');
 const { AMQPConsumer, AMQPPublisher } = require('../../index');
 const queueOptions = require('../util/constructor');
 
-
-
 describe('Publishing to an exchange', () => {
 
     let testNum = 0;
@@ -42,6 +40,24 @@ describe('Publishing to an exchange', () => {
             await producer.publish(msg);
         });
 
+    });
+
+    it('Publishes a message to a queue', async function () {
+        this.timeout(1000);
+        const msg = 'hello world';
+
+        return await new Promise(async (resolve) => {
+            await consumer.listen();
+            consumer.removeAllListeners();
+
+            consumer.on('message', function meHere(message) {
+                expect(message).to.be.eql(msg);
+                consumer.removeAllListeners();
+                resolve();
+            });
+
+            await producer.publishToQueue(msg);
+        });
     });
 
     it('Publishes a lot of messages', async function () {
