@@ -10,7 +10,7 @@ The versioning rules are described on http://semver.org/
 
 ## Loyalty AMQP Library Changelog
 
-### 1.2.0
+### 1.3.0
 * Added possibility to publish directly to a queue
 
 ### 1.2.0
