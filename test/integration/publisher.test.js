@@ -4,6 +4,7 @@ const { expect } = require('chai');
 const rewire = require('rewire');
 const { AMQPConsumer, AMQPPublisher } = require('../../index');
 const queueOptions = require('../util/constructor');
+const uuid = require('uuid');
 
 describe('Publishing to an exchange', () => {
 
@@ -42,6 +43,30 @@ describe('Publishing to an exchange', () => {
 
     });
 
+    it('Publishes a message with headers to an exchange', async function () {
+        this.timeout(1000);
+        const msg = 'hello world';
+        const headers = { a: uuid() };
+
+        return await new Promise(async (resolve, reject) => {
+            await consumer.listen();
+            consumer.removeAllListeners();
+
+            consumer.on('message', function meHere(message, data) {
+                try {
+                    expect(message).to.be.eql(msg);
+                    expect(data.properties.headers).to.be.eql(headers);
+                    consumer.removeAllListeners();
+                } catch (err) {
+                    return reject(err);
+                }
+                resolve();
+            });
+
+            await producer.publish(msg, headers);
+        });
+    });
+
     it('Publishes a message to a queue', async function () {
         this.timeout(1000);
         const msg = 'hello world';
@@ -57,6 +82,30 @@ describe('Publishing to an exchange', () => {
             });
 
             await producer.publishToQueue(msg);
+        });
+    });
+
+    it('Publishes a message with headers to a queue', async function () {
+        this.timeout(1000);
+        const msg = 'hello world';
+        const headers = {a: uuid()};
+
+        return await new Promise(async (resolve, reject) => {
+            await consumer.listen();
+            consumer.removeAllListeners();
+
+            consumer.on('message', function meHere(message, data) {
+                try {
+                    expect(message).to.be.eql(msg);
+                    expect(data.properties.headers).to.be.eql(headers);
+                    consumer.removeAllListeners();
+                } catch (err) {
+                    return reject(err);
+                }
+                resolve();
+            });
+
+            await producer.publishToQueue(msg, headers);
         });
     });
 
