@@ -10,6 +10,9 @@ The versioning rules are described on http://semver.org/
 
 ## Loyalty AMQP Library Changelog
 
+### 1.4.1
+* [PITEAM-17](https://icemobile.atlassian.net/browse/PITEAM-17): Remove icemobilelab-ci GitHub Application Token and support personal Github token.
+
 ### 1.4.0
 * Added feature to supply headers to a publish / publishToQueue
 
