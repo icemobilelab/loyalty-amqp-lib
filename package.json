@@ -1,6 +1,6 @@
 {
   "name": "@icemobile/loyalty-amqp-lib",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Common library for connecting to RabbitMQ",
   "main": "index.js",
   "scripts": {
@@ -48,7 +48,7 @@
     "eslint": "^4.11.0",
     "husky": "^0.14.3",
     "jsdoc": "^3.5.5",
-    "loyalty-commons-v4": "git+https://03c901d62a89771152a29c94be6ed3ca5e9f9894:x-oauth-basic@github.com/icemobilelab/loyalty-commons-v4.git#develop",
+    "loyalty-commons-v4": "git+https://github.com/icemobilelab/loyalty-commons-v4.git#develop",
     "mocha": "^4.0.1",
     "mochawesome": "^3.1.1",
     "nyc": "^11.3.0",
