@@ -54,7 +54,7 @@ pipeline {
           // Temporary - remove these and set in environment
           env.AMQP_HOST="loyalty-rabbitmq.loyalty-dev.svc"
           env.AMQP_USERNAME="icemobile1"
-          env.AMQP_PASSWORD="ve6i5JG005DqBIvP"
+          env.AMQP_PASSWORD="bwNPOT8RXeBX"
 
           env.AMQP_QUEUE="libtest-queue"
           env.AMQP_EXCHANGE="libtest-exchange"
