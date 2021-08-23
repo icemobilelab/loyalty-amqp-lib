@@ -26,4 +26,14 @@ describe('_getChannelConsumer', () => {
         done();
     });
 
+    it('no data should try to emit disconnect on base', function (done) {
+        const base = { emit: sinon.fake() };
+        const channelConsumer = _getChannelConsumer(base, mockLogger);
+        const data = null;
+        channelConsumer(data);
+        expect(base.emit.callCount).to.equal(1);
+        expect(base.emit.getCall(0).args[0]).to.equal('disconnect');
+        done();
+    });
+
 });

@@ -11,7 +11,7 @@ The versioning rules are described on http://semver.org/
 ## Loyalty AMQP Library Changelog
 
 ### 1.4.2
-* Try to reconnect if connection was closed due to unexpected errors.
+* Try to disconnect if there is no data to be consumed.
 
 ### 1.4.1
 * [PITEAM-17](https://icemobile.atlassian.net/browse/PITEAM-17): Remove icemobilelab-ci GitHub Application Token and support personal Github token.
