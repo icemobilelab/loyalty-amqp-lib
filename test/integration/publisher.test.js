@@ -4,7 +4,7 @@ const { expect } = require('chai');
 const rewire = require('rewire');
 const { AMQPConsumer, AMQPPublisher } = require('../../index');
 const queueOptions = require('../util/constructor');
-const uuid = require('uuid');
+const uuid = require('uuid').v4;
 
 describe('Publishing to an exchange', () => {
 
@@ -68,7 +68,6 @@ describe('Publishing to an exchange', () => {
     });
 
     it('Publishes a message to a queue', async function () {
-        this.timeout(1000);
         const msg = 'hello world';
 
         return await new Promise(async (resolve) => {

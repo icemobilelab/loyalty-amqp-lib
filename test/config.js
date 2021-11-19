@@ -1,6 +1,7 @@
 'use strict';
 
 const convict = require('convict');
+convict.addFormats(require('convict-format-with-validator'));
 
 process.env.BLUEBIRD_DEBUG = 1;
 

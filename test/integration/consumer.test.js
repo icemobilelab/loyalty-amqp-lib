@@ -9,6 +9,7 @@ const queueOptions = require('../util/constructor');
 describe('Consumer Integration Tests', () => {
     describe('Listening to a queue', () => {
 
+        let _connect = AMQP.__get__('_connect');
         let _getChannel = AMQP.__get__('_getChannel');
         let consumer, producer, config;
         let testNum = 0;
@@ -41,7 +42,8 @@ describe('Consumer Integration Tests', () => {
         it('Handles errors when listening to a queue', async function () {
 
             await new Promise(async (resolve) => {
-                const channel = await _getChannel(consumer);
+                await _connect(consumer);
+                const channel = await _getChannel(consumer, false);
                 consumer.once('reconnect', () => {
                     resolve();
                 });
@@ -127,7 +129,7 @@ describe('Consumer Integration Tests', () => {
 
                 consumer.once('message', async (msg, data) => {
                     expect(message).to.be.eql(msg);
-                    consumer.rejectMessage(data);
+                    await consumer.rejectMessage(data);
                 });
                 await producer.publish(message);
             });
