@@ -68,7 +68,6 @@ describe('Publishing to an exchange', () => {
     });
 
     it('Publishes a message to a queue', async function () {
-        // this.timeout(1000);
         const msg = 'hello world';
 
         return await new Promise(async (resolve) => {
