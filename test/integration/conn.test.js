@@ -12,9 +12,11 @@ describe('Handle connecting & disconnecting', () => {
     describe('Starting up the queue', () => {
 
         it('check created channel health', async function () {
+            const _connect = AMQP.__get__('_connect');
             const _createChannel = AMQP.__get__('_createChannel');
             const base = new AMQP.AMQP(queueOptions('checkChannel'));
-            const channel = await _createChannel(base, false);
+            await _connect(base);
+            const channel = await _createChannel(base);
 
             expect(channel).to.deep.equal(base._channel);
             return channel.checkExchange('amq.direct');
@@ -92,14 +94,16 @@ describe('Handle connecting & disconnecting', () => {
         });
 
         it('should be unable to assert queue on closed channel', async function () {
-            const _closeChannel = AMQP.__get__('_closeChannel');
+            const _connect = AMQP.__get__('_connect');
             const _getChannel = AMQP.__get__('_getChannel');
 
             const base = new AMQP.AMQP(queueOptions('checkChannelFail'));
-            const channel = await _getChannel(base);
+            await _connect(base);
+            const channel = await _getChannel(base, false);
 
-            await _closeChannel(base);
-            channel.assertQueue('should-not-be-possible')
+            channel.removeAllListeners();
+            await channel.close();
+            return channel.assertQueue('should-not-be-possible')
                 .then(() => { throw new Error(); })
                 .catch(err => {
                     expect(err.message).to.contain('Channel closed');

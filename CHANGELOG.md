@@ -10,6 +10,15 @@ The versioning rules are described on http://semver.org/
 
 ## Loyalty AMQP Library Changelog
 
+### 1.5.0
+* Fix AMQP connection resiliency
+
+  When connections were forcibly closed (something that can be done both
+  from the RabbitMQ management UI and with `rabbitmqctl`), Consumers and
+  Producers would error out and never reconnect. These changes basically
+  impose a persistent reconnect cycle, except when a connection is
+  manually closed by the client.
+
 ### 1.4.2
 * Try to disconnect if there is no data to be consumed.
 

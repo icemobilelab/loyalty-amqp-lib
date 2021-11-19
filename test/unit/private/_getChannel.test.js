@@ -10,6 +10,10 @@ describe('_getChannel', () => {
 
     const _getChannel = AMQP.__get__('_getChannel');
 
+    AMQP.__set__('_lockReads', () => {});
+    AMQP.__set__('_lockWrites', () => {});
+    AMQP.__set__('_unlock', () => {});
+
     it('returns existing channel if exists', async function () {
         const base = { _channel: new EventEmitter(), logger: mockLogger };
         const channel = await _getChannel(base, false);
@@ -28,7 +32,7 @@ describe('_getChannel', () => {
             return newChannel;
         });
 
-        const channel = await _getChannel(base, false);
+        const channel = await _getChannel(base);
         expect(channel).to.deep.equal(newChannel);
     });
 

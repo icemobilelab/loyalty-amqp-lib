@@ -1,7 +1,7 @@
 version: '3'
 services:
     rabbit:
-        image: rabbitmq:3.6.12-management
+        image: rabbitmq:3.9-management
         environment:
             RABBITMQ_DEFAULT_USER: commons
             RABBITMQ_DEFAULT_PASS: commons
