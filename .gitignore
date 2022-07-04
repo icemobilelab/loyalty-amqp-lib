@@ -1,8 +1,6 @@
 # Environment
 .env
 
-### Node template
-.npmrc
 # Logs
 logs
 *.log

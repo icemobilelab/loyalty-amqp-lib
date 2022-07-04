@@ -1,7 +1,6 @@
 'use strict';
 
 const { expect } = require('chai');
-const Bluebird = require('bluebird');
 const rewire = require('rewire');
 const AMQP = rewire('../../../lib/amqp-base');
 const config = require('../../config');
@@ -13,8 +12,8 @@ describe('_createConnection', () => {
     const _createConnection = AMQP.__get__('_createConnection');
 
     it('Successfully creates a connection', async () => {
-        const resolve = AMQP.__set__('amqp.connect', () => {
-            return Bluebird.resolve({ createChannel() {} });
+        const resolve = AMQP.__set__('amqp.connect', async () => {
+            return { createChannel() {} };
         });
         after(resolve);
 
@@ -24,10 +23,10 @@ describe('_createConnection', () => {
     });
 
     it('Should proxy amqp.connect errors', async function () {
-        const resolve = AMQP.__set__('amqp.connect', () => {
+        const resolve = AMQP.__set__('amqp.connect', async () => {
             const err = new Error();
             err.message = 'ACCESS_REFUSED';
-            return Bluebird.reject(err);
+            throw err;
         });
         after(resolve);
 
@@ -48,7 +47,8 @@ describe('_createConnection', () => {
 
         await _createConnection(host, 'invalidUser', password, logger, retry)
             .catch(
-                () => {
+                (err) => {
+                    expect(err).to.exist;
                     expect(new Date().getTime() - startTime).to.be.greaterThan(2000);
                 }
             );

@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+set +e # ensure we don't quit the script due to unforeseen errors
+npm run lint && \
+    npm run unit-test && \
+    npm run up && \
+    npm run wait && \
+    npm run integration-test
+
+# ensure we capture exit code, in case any of the previous commands exits with a non-zero result
+exit_code=$?
+
+# Cleanup after ourselves, regardless of exit code
+npm run down
+
+# bubble up any non-zero exit code
+exit $exit_code
