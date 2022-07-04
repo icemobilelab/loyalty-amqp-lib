@@ -85,16 +85,16 @@ const config = convict({
         }
     },
     sonarqube: {
-        serverUrl: {
-            doc: 'The SonarQube Host',
+        url: {
+            doc: 'URL of the SonarQube server',
             format: 'url',
             default: 'https://sonarcloud.io',
-            env: 'SONARQUBE_HOST'
+            env: 'SONARQUBE_URL'
         },
         token: {
-            doc: 'The SonarQube Token',
+            doc: 'SonarQube token',
             format: String,
-            default: '3e54ded412f11c98480daf42fe7dfc913fcb7357',
+            default: 'faf488ec16ef628f2bc8573818384f337de91cd0',
             env: 'SONARQUBE_TOKEN'
         },
         projectKey: {
@@ -103,11 +103,11 @@ const config = convict({
             default: 'loyalty-amqp-lib',
             env: 'SONARQUBE_PROJECT_KEY'
         },
-        projectVersion: {
-            doc: 'The SonarQube Project Version',
+        organization: {
+            doc: 'The organization key',
             format: String,
-            default: '0.0.0',
-            env: 'SONARQUBE_PROJECT_VERSION'
+            default: 'icemobilelab',
+            env: 'SONARQUBE_ORG'
         },
     }
 });
