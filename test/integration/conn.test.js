@@ -1,7 +1,6 @@
 'use strict';
 
 const { expect } = require('chai');
-const Bluebird = require('bluebird');
 const { AMQPConsumer } = require('../../index');
 const rewire = require('rewire');
 const AMQP = rewire('../../lib/amqp-base');
@@ -34,12 +33,12 @@ describe('Handle connecting & disconnecting', () => {
             queue = new AMQPConsumer(options);
 
             let count = 0;
-            const resolve = AMQP.__set__('amqp.connect', () => {
+            const resolve = AMQP.__set__('amqp.connect', async () => {
                 count++;
                 let err = new Error('ENOTFOUND');
                 err.code = 'ENOTFOUND';
                 // bluebird-retry requires bluebird promises
-                return Bluebird.reject(err);
+                throw err;
             });
 
             queue.listen()
@@ -62,11 +61,11 @@ describe('Handle connecting & disconnecting', () => {
             options.retry.interval = 2;
             queue = new AMQPConsumer(options);
 
-            const resolve = AMQP.__set__('amqp.connect', () => {
+            const resolve = AMQP.__set__('amqp.connect', async () => {
                 let err = new Error('ENOTFOUND');
                 err.code = 'ENOTFOUND';
                 // bluebird-retry requires bluebird promises
-                return Bluebird.reject(err);
+                throw err;
             });
 
             queue.listen()

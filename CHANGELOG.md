@@ -10,6 +10,13 @@ The versioning rules are described on http://semver.org/
 
 ## Loyalty AMQP Library Changelog
 
+### 2.0.0
+* [SHIP-10412](https://icemobile.atlassian.net/browse/SHIP-10412):
+  * Updated to Node.js 16
+  * Updated dependencies
+  * Removed Bluebird
+  * Replaced `bluebird-retry` with `p-retry`
+
 ### 1.5.0
 * Fix AMQP connection resiliency
 

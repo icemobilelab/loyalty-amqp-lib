@@ -1,38 +1,54 @@
 'use strict';
 
-/*
- * Manually run the SonarQube report tool, used by the npm task "sonarqube".
- *
- * You can send the SonarQube reports to the server running on Azure DEV. Since the service is not publicly available,
- * you will have to redirect the port 9000 from the pod.
- *
- * In order to do so, first get the login command from
- * `https://master-dev-westeurope.bright-shopper.nl:8443/console/command-line`
- *
- * Then, run the following command:
- * ```
- * > oc project ci && oc port-forward $(oc get pods | grep -i "sonarqube" | awk '{print $1}') 9000:9000
- * ```
- *
- * And then you can run the following npm task, which is configured by default to send reports to
- * `http://localhost:9000`:
- *
- * ```
- * > npm run sonarqube
- * ```
- *
- * Go back to your browser, wait until the report is processed, and you shall see results in the dashboard.
- */
-
 const { sonarqube } = require('loyalty-commons-v4');
-const config = require('./../config');
+
+const config = require('../config');
 const pkg = require('../../package.json');
+const fs = require('fs');
+const request = require('request-promise-native');
+const path = require('path');
 
 sonarqube.report({
-    serverUrl: config.get('sonarqube.serverUrl'),
+    serverUrl: config.get('sonarqube.url'),
     token: config.get('sonarqube.token'),
-    organization: 'icemobilelab',
-    projectKey: 'loyalty-amqp-lib',
-    projectName: 'Loyalty AMQP Lib',
+    organization: config.get('sonarqube.organization'),
+    projectKey: config.get('sonarqube.projectKey'),
+    projectName: config.get('sonarqube.projectKey'),
     projectVersion: pkg.version
-}, () => {});
+}, () => {
+    const taskReportPath = path.resolve(__dirname, '..', '..', '.scannerwork', 'report-task.txt');
+    const taskReport = fs.readFileSync(taskReportPath, {encoding: 'utf-8'});
+
+    // RegEx the task URL out of task report
+    const taskUrl = /ceTaskUrl=(.*)/g.exec(taskReport)[1];
+
+    const poller = setInterval(async () => {
+        const taskBody = await request(taskUrl, {
+            auth: { user: config.get('sonarqube.token') },
+            json: true
+        });
+
+        if (taskBody.task && taskBody.task.status === 'SUCCESS') {
+            const gateBody = await request('https://sonarcloud.io/api/qualitygates/project_status',
+                {
+                    json: true,
+                    auth: { user: config.get('sonarqube.token') },
+                    qs: {
+                        analysisId: taskBody.task.analysisId
+                    }
+                });
+
+            if (gateBody.projectStatus && gateBody.projectStatus.status) {
+                if (gateBody.projectStatus.status === 'ERROR') {
+                    console.log('Sonarcloud.io returned that quality gates failed:'); // eslint-disable-line
+                    console.dir(gateBody.projectStatus.conditions, null, 4); // eslint-disable-line
+                    process.exit(1); // error out
+                }
+                console.log('Sonarcloud.io returned that quality gates did not fail:'); // eslint-disable-line
+                console.dir(gateBody.projectStatus.conditions, null, 4); // eslint-disable-line
+                clearInterval(poller);
+            }
+        }
+    }, 5000);
+
+});

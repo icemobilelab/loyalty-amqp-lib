@@ -1,6 +1,6 @@
 #!groovy
 
-@Library('jenkins-pipeline-library@master') _
+@Library('pipeline_library@master') _
 
 import com.icemobile.jenkins.pipeline.lib.*
 
@@ -13,7 +13,7 @@ pipeline {
   }
 
   agent {
-    label 'nodejs'
+    label 'nodejs16'
   }
 
   stages {
@@ -27,23 +27,30 @@ pipeline {
           projectName = getBaseName()
           projectVersion = setProjectVersionType()
           serviceTag = setTagGlobal(gitBranch, projectVersion)
+
+          if (gitBranch != 'master') {
+              // add short commit tag to the image tag
+              serviceTag = serviceTag + "-" + gitCommit
+          }
+
           delDCandSECRETS(projectName)
+          // sets the service-tag.txt for the loyalty-ci-dashboard
+          writeFile(file: 'service-tag.txt', text: serviceTag.trim())
+          archiveArtifacts('service-tag.txt')
+
+          setGithubStatus(projectName, GIT_COMMIT, BUILD_URL, "integration-test", true);
+          setGithubStatus(projectName, GIT_COMMIT, BUILD_URL, "unit-test", true);
+          setGithubStatus(projectName, GIT_COMMIT, BUILD_URL + '/checkstyleResult', "lint", true);
+          setGithubStatus(projectName, GIT_COMMIT, BUILD_URL, "static-code-analysis", true);
+          setGithubStatus(projectName, GIT_COMMIT, BUILD_URL, "code-coverage-unit-test", true);
         }
       }
     }
 
-   stage('Git Status Pending') {
-    steps {
-      script {
-          setGithubStatus(projectName, GIT_COMMIT, BUILD_URL, "Code Quality", true);
-        }
-      }
-    }
-
-    stage('Run Unit Tests') {
+    stage('Unit Tests') {
       steps {
         script {
-          unitTestJS();
+            stageUnitTestAndLint(projectName, 60, gitBranch)
         }
       }
     }
@@ -52,7 +59,7 @@ pipeline {
       steps {
         script {
           // Temporary - remove these and set in environment
-          env.AMQP_HOST="loyalty-rabbitmq.loyalty-dev.svc"
+          env.AMQP_HOST="loyalty-rabbitmq.loyalty-tst.svc"
           env.AMQP_USERNAME="icemobile1"
           env.AMQP_PASSWORD="bwNPOT8RXeBX"
 
@@ -62,33 +69,57 @@ pipeline {
           env.AMQP_ROUTE="libtest-route"
           env.LOG_LEVEL="error"
 
-          IntegrationTestJS();
+          if(IntegrationTestJS() == 0) {
+            setGithubStatus(projectName, GIT_COMMIT, BUILD_URL, "integration-test", false, 'SUCCESS');
+          } else {
+            setGithubStatus(projectName, GIT_COMMIT, BUILD_URL, "integration-test", false, 'FAILURE');
+          };
         }
       }
     }
 
-    stage('ESLint & Sonarcloud') {
-     steps {
-       script {
-          CodeQualityChecks();
-       }
-     }
+    stage('Create Tag') {
+        when {
+            expression {
+                return gitBranch == 'master'
+            }
+        }
+        steps {
+            script {
+                setTag(projectVersion, gitCommit)
+            }
+        }
     }
 
     stage('Publish To Registry') {
+      when {
+        expression {
+          return gitBranch == 'master'
+        }
+      }
       steps {
         script {
-          publishToNPM();
+            if (projectVersion == gitTag) {
+                echo 'No version change. Skip publishToNPM'
+            } else {
+                publishToNPM();
+            }
         }
       }
     }
 
-    stage('Git Status Quality Tests') {
+    stage('Slack Reporting') {
+      when {
+        expression {
+          return gitBranch == 'master'
+        }
+      }
       steps {
         script {
-          setGithubStatus(projectName, GIT_COMMIT, BUILD_URL, "Code Quality");
+          slackJenkins(projectVersion, gitCommit, projectName, gitBranch);
         }
       }
     }
+
   }
 }
