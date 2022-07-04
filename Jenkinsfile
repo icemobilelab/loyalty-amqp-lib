@@ -69,7 +69,11 @@ pipeline {
           env.AMQP_ROUTE="libtest-route"
           env.LOG_LEVEL="error"
 
-          IntegrationTestJS();
+          if(IntegrationTestJS() == 0) {
+            setGithubStatus(projectName, GIT_COMMIT, BUILD_URL, "integration-test", false, 'SUCCESS');
+          } else {
+            setGithubStatus(projectName, GIT_COMMIT, BUILD_URL, "integration-test", false, 'FAILURE');
+          };
         }
       }
     }
