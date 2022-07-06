@@ -10,6 +10,9 @@ The versioning rules are described on http://semver.org/
 
 ## Loyalty AMQP Library Changelog
 
+### 2.1.0
+* Brought back the `.queue` suffix for dead letter queues, as it existed in the old commons amqp library
+
 ### 2.0.0
 * [SHIP-10412](https://icemobile.atlassian.net/browse/SHIP-10412):
   * Updated to Node.js 16
