@@ -22,9 +22,9 @@ jobs:
                   registry-url: 'https://npm.pkg.github.com'
                   scope: '@icemobile'
 
-            - name: Configure Git to use GITHUB_TOKEN for private repo access
+            - name: Rewrite SSH git URLs to use HTTPS with token
               run: |
-                 git config --global url."https://${GITHUB_TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+                git config --global url."https://${GITHUB_TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
