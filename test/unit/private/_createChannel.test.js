@@ -1,27 +1,22 @@
-'use strict';
-
-const { expect } = require('chai');
-const { EventEmitter } = require('events');
-const rewire = require('rewire');
-const AMQP = rewire('../../../lib/amqp-base');
-const config = require('../../config');
-const constructor = require('../../util/constructor');
+import { expect } from 'chai';
+import { EventEmitter } from 'events';
+import config from '../../config.js';
+import constructor from '../../util/constructor.js';
+import { AMQP, _createChannel } from '../../../lib/amqp-base.js';
 
 describe('_createChannel', () => {
+  it('creates a new channel, sets it on base', async function () {
+    const base = new AMQP(constructor(config));
 
-    const _createChannel = AMQP.__get__('_createChannel');
-    const base = new AMQP.AMQP(constructor(config));
-    const resolve = AMQP.__set__('_getConnection', () => {
-        let conn = new EventEmitter();
-        conn.createChannel = () => {
-            return Promise.resolve(new EventEmitter());
-        };
-        return Promise.resolve(conn);
-    });
-    after(resolve);
+    // Mock connection with the createChannel method
+    const mockConnection = new EventEmitter();
+    mockConnection.createChannel = () => {
+      return Promise.resolve(new EventEmitter());
+    };
+    base._connection = mockConnection;
 
-    it('creates a new channel, sets it on base', async function () {
-        const channel = await _createChannel(base, false);
-        expect(channel).to.deep.equal(base._channel);
-    });
+    const channel = await _createChannel(base);
+    expect(channel).to.exist;
+    expect(base._channel).to.deep.equal(channel);
+  });
 });

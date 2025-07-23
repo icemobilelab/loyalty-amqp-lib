@@ -1,34 +1,24 @@
-'use strict';
-
-const { expect } = require('chai');
-const rewire = require('rewire');
-const AMQP = rewire('../../../lib/amqp-base');
-const config = require('../../config');
-const constructor = require('../../util/constructor');
+import { expect } from 'chai';
+import { AMQP, _setChannel } from '../../../lib/amqp-base.js';
+import config from '../../config.js';
+import constructor from '../../util/constructor.js';
 
 describe('_setChannel', () => {
+  it('Successfully sets a channel', function () {
+    this.timeout(2000);
 
-    function _setChannel(base, ...args) {
-        const inner = AMQP.__get__('_setChannel');
-        const res = inner(base, ...args);
-        return res;
-    }
+    const testValue = 'test';
+    const base = new AMQP(constructor(config));
+    _setChannel(base, testValue);
+    expect(base._channel).to.be.eql(testValue);
+  });
+  it('Successfully sets a connection to undefined', function () {
+    this.timeout(2000);
 
-    it('Successfully sets a channel', function () {
-        this.timeout(2000);
-
-        const testValue = 'test';
-        const base = new AMQP.AMQP(constructor(config));
-        _setChannel(base, testValue);
-        expect(base._channel).to.be.eql(testValue);
-    });
-    it('Successfully sets a connection to undefined', function () {
-        this.timeout(2000);
-
-        const testValue = undefined;
-        const base = new AMQP.AMQP(constructor(config));
-        base._channel = 'incorrect_value';
-        _setChannel(base, testValue);
-        expect(base._channel).to.be.eql(testValue);
-    });
+    const testValue = undefined;
+    const base = new AMQP(constructor(config));
+    base._channel = 'incorrect_value';
+    _setChannel(base, testValue);
+    expect(base._channel).to.be.eql(testValue);
+  });
 });

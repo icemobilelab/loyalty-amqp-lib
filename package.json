@@ -1,11 +1,14 @@
 {
   "name": "@icemobile/loyalty-amqp-lib",
-  "version": "2.1.0",
+  "version": "3.0.0",
+  "type": "module",
   "description": "Common library for connecting to RabbitMQ",
   "main": "index.js",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "start": "node .",
-    "lint": "eslint lib test config index.js",
     "integration-test": "nyc mocha --timeout 10000 -r test/util/pretest.js --exit 'test/integration/**/*.test.js' --reporter mochawesome",
     "unit-test": "nyc mocha -r test/util/pretest.js --exit 'test/unit/**/*.test.js'",
     "test-watch": "nyc mocha -r test/util/pretest.js --watch --exit 'test/**/*.test.js'",
@@ -13,10 +16,14 @@
     "debug": "nodemon --ignore 'test/*' --debug=56745 .",
     "jsdoc": "jsdoc -r lib -R README.md -d doc/jsdoc",
     "sonarqube": "node test/sonarqube/sonarqube",
-    "up": "npm run down; docker-compose up -d",
-    "down": "rm -rf ./coverage; docker-compose down",
+    "up": "npm run down; docker compose up -d",
+    "down": "rm -rf ./coverage; docker compose down",
     "wait": "wait-on -l tcp:localhost:5672 http-get://localhost:15672",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "lint": "eslint lib test config index.js",
+    "lint:fix": "eslint --fix \"**/*.{js,mjs}\"",
+    "prettier": "prettier --check \"**/*.{js,mjs,json}\"",
+    "prettier:fix": "prettier --write \"**/*.{js,mjs,json}\""
   },
   "repository": {
     "type": "git",
@@ -32,27 +39,33 @@
   },
   "homepage": "https://github.com/icemobilelab/loyalty-amqp-lib#readme",
   "dependencies": {
-    "amqplib": "^0.10.0",
-    "convict": "^6.2.1",
+    "@eslint/js": "^9.31.0",
+    "ajv-formats": "^3.0.1",
+    "amqplib": "^0.10.8",
+    "convict": "^6.2.4",
     "convict-format-with-validator": "^6.2.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.3",
+    "globals": "^16.3.0",
     "locks": "^0.2.2",
-    "p-retry": "^4.6.2",
-    "uuid": "^8.3.2"
+    "p-retry": "^6.2.1",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@icemobile/eslint-config-backend": "^1.1.0",
-    "chai": "^4.3.4",
-    "eslint": "^8.2.0",
+    "chai": "^4.4.1",
+    "eslint": "^9.29.0",
+    "got": "^14.4.5",
     "husky": "^8.0.1",
-    "jsdoc": "^3.6.7",
+    "jsdoc": "^4.0.4",
     "loyalty-commons-v4": "github:icemobilelab/loyalty-commons-v4#develop",
     "mocha": "^10.0.0",
     "mochawesome": "^7.0.1",
     "nyc": "^15.1.0",
-    "request-promise-native": "^1.0.9",
     "rewire": "^6.0.0",
-    "sinon": "^14.0.0",
-    "wait-on": "^6.0.1"
+    "sinon": "^21.0.0",
+    "wait-on": "^8.0.3"
   },
   "nyc": {
     "include": [

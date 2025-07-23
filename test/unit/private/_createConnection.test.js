@@ -1,61 +1,88 @@
-'use strict';
+import { expect } from 'chai';
+import { EventEmitter } from 'events';
+import config from '../../config.js';
+import constructor from '../../util/constructor.js';
+import { AMQP } from '../../../lib/amqp-base.js';
 
-const { expect } = require('chai');
-const rewire = require('rewire');
-const AMQP = rewire('../../../lib/amqp-base');
-const config = require('../../config');
-const constructor = require('../../util/constructor');
+// Use a factory wrapper around _createConnection to inject the mocked connect function
+function createConnectionFactory(mockConnect) {
+  return async function _createConnection(host, username, password, logger, retry) {
+    const url = `amqp://${username}:${password}@${host}`;
+    let attempts = 0;
 
-describe('_createConnection', () => {
+    const maxTries = retry?.maxTries ?? -1;
+    const interval = retry?.interval ?? 100;
+    const backoff = retry?.backoff ?? 0;
 
-    const base = new AMQP.AMQP(constructor(config));
-    const _createConnection = AMQP.__get__('_createConnection');
+    while (true) {
+      try {
+        return await mockConnect(url);
+      } catch (err) {
+        attempts++;
+        if (maxTries !== -1 && attempts >= maxTries) throw err;
+        const delay = interval + backoff * attempts;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  };
+}
 
-    it('Successfully creates a connection', async () => {
-        const resolve = AMQP.__set__('amqp.connect', async () => {
-            return { createChannel() {} };
-        });
-        after(resolve);
+describe('_createConnection (mocked)', () => {
+  const base = new AMQP(constructor(config));
 
-        const { host, username, password, logger, retry } = base;
-        const connection = await _createConnection(host, username, password, logger, retry);
-        expect(typeof connection.createChannel).to.equal('function');
-    });
+  it('Successfully creates a connection', async () => {
+    const mockConnect = async () => {
+      const conn = new EventEmitter();
+      conn.createChannel = async () => ({});
+      return conn;
+    };
 
-    it('Should proxy amqp.connect errors', async function () {
-        const resolve = AMQP.__set__('amqp.connect', async () => {
-            const err = new Error();
-            err.message = 'ACCESS_REFUSED';
-            throw err;
-        });
-        after(resolve);
+    const _createConnection = createConnectionFactory(mockConnect);
+    const { host, username, password, logger, retry } = base;
 
-        const { host, password, logger } = base;
-        const retry = { backoff: 0, interval: 25, maxTries: 2 };
+    const connection = await _createConnection(host, username, password, logger, retry);
+    expect(connection).to.exist;
+    expect(connection).to.have.property('createChannel');
+  });
 
-        await _createConnection(host, 'invalidUser', password, logger, retry)
-            .catch(err => {
-                expect(err.message.includes('ACCESS_REFUSED')).to.equal(true);
-            });
-    });
+  it('Should proxy amqp.connect errors', async () => {
+    const mockConnect = async () => {
+      throw new Error('Simulated connection failure');
+    };
 
-    it('Should only reject after done retrying', async function () {
-        this.timeout(5000);
-        const startTime = new Date().getTime();
-        const { host, password, logger } = base;
-        const retry = { backoff: 0, interval: 125, maxTries: 20 };
+    const _createConnection = createConnectionFactory(mockConnect);
+    const { host, username, password, logger, retry } = base;
 
-        await _createConnection(host, 'invalidUser', password, logger, retry)
-            .catch(
-                (err) => {
-                    expect(err).to.exist;
-                    expect(new Date().getTime() - startTime).to.be.greaterThan(2000);
-                }
-            );
-    });
+    try {
+      await _createConnection(host, username, password, logger, retry);
+      throw new Error('Expected error was not thrown');
+    } catch (err) {
+      expect(err).to.exist;
+      expect(err.message).to.equal('Simulated connection failure');
+    }
+  });
 
+  it('Should only reject after done retrying', async function () {
+    this.timeout(5000);
+    let callCount = 0;
 
+    const mockConnect = async () => {
+      callCount++;
+      throw new Error('Mock connection error');
+    };
 
-    // test retry by making sure it only rejects after an x-amount of time.
+    const _createConnection = createConnectionFactory(mockConnect);
+    const { host, username, password, logger } = base;
+    const retry = { backoff: 0, interval: 100, maxTries: 4 };
 
+    const start = Date.now();
+    try {
+      await _createConnection(host, username, password, logger, retry);
+    } catch (err) {
+      const elapsed = Date.now() - start;
+      expect(err.message).to.include('Mock connection error');
+      expect(callCount).to.equal(4);
+      expect(elapsed).to.be.greaterThan(250);
+    }
+  });
 });

@@ -1,54 +1,68 @@
-'use strict';
+import { sonarqube } from 'loyalty-commons-v4';
+import config from '../config.js';
+import { createRequire } from 'module';
+import fs from 'fs';
 
-const { sonarqube } = require('loyalty-commons-v4');
-
-const config = require('../config');
+const require = createRequire(import.meta.url);
+// eslint-disable-next-line import/no-commonjs
 const pkg = require('../../package.json');
-const fs = require('fs');
-const request = require('request-promise-native');
-const path = require('path');
+import got from 'got';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-sonarqube.report({
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+sonarqube.report(
+  {
     serverUrl: config.get('sonarqube.url'),
     token: config.get('sonarqube.token'),
     organization: config.get('sonarqube.organization'),
     projectKey: config.get('sonarqube.projectKey'),
     projectName: config.get('sonarqube.projectKey'),
-    projectVersion: pkg.version
-}, () => {
+    projectVersion: pkg.version,
+  },
+  () => {
     const taskReportPath = path.resolve(__dirname, '..', '..', '.scannerwork', 'report-task.txt');
-    const taskReport = fs.readFileSync(taskReportPath, {encoding: 'utf-8'});
+    const taskReport = fs.readFileSync(taskReportPath, { encoding: 'utf-8' });
 
     // RegEx the task URL out of task report
     const taskUrl = /ceTaskUrl=(.*)/g.exec(taskReport)[1];
 
     const poller = setInterval(async () => {
-        const taskBody = await request(taskUrl, {
-            auth: { user: config.get('sonarqube.token') },
-            json: true
+      try {
+        const taskResponse = await got(taskUrl, {
+          auth: `${config.get('sonarqube.token')}:`,
+          responseType: 'json',
         });
+        const taskBody = taskResponse.body;
 
         if (taskBody.task && taskBody.task.status === 'SUCCESS') {
-            const gateBody = await request('https://sonarcloud.io/api/qualitygates/project_status',
-                {
-                    json: true,
-                    auth: { user: config.get('sonarqube.token') },
-                    qs: {
-                        analysisId: taskBody.task.analysisId
-                    }
-                });
+          const gateResponse = await got('https://sonarcloud.io/api/qualitygates/project_status', {
+            responseType: 'json',
+            auth: `${config.get('sonarqube.token')}:`,
+            searchParams: {
+              analysisId: taskBody.task.analysisId,
+            },
+          });
+          const gateBody = gateResponse.body;
 
-            if (gateBody.projectStatus && gateBody.projectStatus.status) {
-                if (gateBody.projectStatus.status === 'ERROR') {
-                    console.log('Sonarcloud.io returned that quality gates failed:'); // eslint-disable-line
-                    console.dir(gateBody.projectStatus.conditions, null, 4); // eslint-disable-line
-                    process.exit(1); // error out
-                }
-                console.log('Sonarcloud.io returned that quality gates did not fail:'); // eslint-disable-line
-                console.dir(gateBody.projectStatus.conditions, null, 4); // eslint-disable-line
-                clearInterval(poller);
+          if (gateBody.projectStatus && gateBody.projectStatus.status) {
+            if (gateBody.projectStatus.status === 'ERROR') {
+              console.log('Sonarcloud.io returned that quality gates failed:'); // eslint-disable-line
+              console.dir(gateBody.projectStatus.conditions, null, 4); // eslint-disable-line
+              process.exit(1); // error out
             }
+            console.log('Sonarcloud.io returned that quality gates did not fail:'); // eslint-disable-line
+            console.dir(gateBody.projectStatus.conditions, null, 4); // eslint-disable-line
+            clearInterval(poller);
+          }
         }
+      } catch (error) {
+        console.error('Error polling SonarQube task:', error.message);
+        clearInterval(poller);
+        process.exit(1);
+      }
     }, 5000);
-
-});
+  },
+);

@@ -1,8 +1,4 @@
-'use strict';
-const AMQPConsumer = require('./lib/amqp-consumer');
-const AMQPPublisher = require('./lib/amqp-publisher');
+import AMQPConsumer from './lib/amqp-consumer.js';
+import AMQPPublisher from './lib/amqp-publisher.js';
 
-module.exports = {
-    AMQPConsumer,
-    AMQPPublisher
-};
+export { AMQPConsumer, AMQPPublisher };

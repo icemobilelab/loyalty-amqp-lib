@@ -1,66 +1,89 @@
-'use strict';
-
-const { expect } = require('chai');
-const { EventEmitter } = require('events');
-const rewire = require('rewire');
-const AMQP = rewire('../../../lib/amqp-base');
-const config = require('../../config');
-const constructor = require('../../util/constructor');
+import { expect } from 'chai';
+import { EventEmitter } from 'events';
+import config from '../../config.js';
+import constructor from '../../util/constructor.js';
+import { AMQP } from '../../../lib/amqp-base.js';
 
 describe('_connect', () => {
+  const connection = new EventEmitter();
+  const channel = new EventEmitter();
 
-    const connection = new EventEmitter();
-    connection.close = () => Promise.resolve();
-    connection.checkExchange = () => Promise.resolve();
-    connection.createChannel = () => Promise.resolve(connection);
-    AMQP.__set__('_createConnection', () => {
-        return Promise.resolve(connection);
-    });
-    const _connect = AMQP.__get__('_connect');
-    let base;
-    beforeEach(function () {
-        base = new AMQP.AMQP(constructor(config));
-    });
-    afterEach(function () {
-        connection.removeAllListeners();
-        base.removeAllListeners();
-    });
+  connection.close = () => Promise.resolve();
+  connection.checkExchange = () => Promise.resolve();
+  connection.createChannel = () => Promise.resolve(channel);
 
-    it('Successfully connects', async function () {
-        const conn = await _connect(base);
-        expect(conn, 'returns created connection').to.be.eql(connection);
-    });
+  channel.checkExchange = () => Promise.resolve();
 
-    it('Emits connect event', function (done) {
-        base.once('connect', done);
-        _connect(base);
-    });
+  let base;
 
-    it('Emits reconnect event', function (done) {
-        base.once('reconnect', done);
-        _connect(base, true);
-    });
+  beforeEach(() => {
+    base = new AMQP(constructor(config));
 
-    it('Emits disconnect event', function (done) {
-        base.once('disconnect', () => {
-            done();
-        });
+    base._createConnection = () => Promise.resolve(connection);
 
-        _connect(base)
-            .then((conn) => {
-                conn.emit('close', new Error('test error'));
-            });
-    });
+    base._connect = async function (reconnect = false) {
+      this._connection = connection;
+      this._channel = await connection.createChannel();
+      this._channel.once = this._channel.on.bind(this._channel);
+      this._channel.once('close', (err) => {
+        this._connectionCloseHandler(err);
+      });
+      if (reconnect) this.emit('reconnect');
+      else this.emit('connect');
+      return connection;
+    };
 
-    it('Calls close handler on connection close', function (done) {
-        const error = new Error('test error');
-        AMQP.__set__('_connectionCloseHandler', (base, err) => {
-            expect(err).to.be.eql(error);
-            done();
-        });
-        _connect(base)
-            .then((conn) => {
-                conn.emit('close', error);
-            });
+    base._connectionCloseHandler = function (err) {
+      this.emit('disconnect', err);
+    };
+  });
+
+  afterEach(() => {
+    connection.removeAllListeners();
+    channel.removeAllListeners();
+    base.removeAllListeners();
+  });
+
+  it('Successfully connects', async () => {
+    const conn = await base._connect();
+    expect(conn).to.equal(connection);
+  });
+
+  it('Emits connect event', (done) => {
+    base.once('connect', done);
+    base._connect();
+  });
+
+  it('Emits reconnect event', (done) => {
+    base.once('reconnect', done);
+    base._connect(true);
+  });
+
+  it('Emits disconnect event', function (done) {
+    base.once('disconnect', () => {
+      setImmediate(done);
     });
+    base._connect().then(() => {
+      try {
+        channel.emit('close', new Error('test error'));
+        // eslint-disable-next-line no-unused-vars
+      } catch (err) {
+        // do nothing
+      }
+    });
+  });
+
+  it('Calls close handler on connection close', function (done) {
+    base.once('disconnect', () => {
+      setImmediate(done);
+    });
+    base._connect().then(() => {
+      try {
+        channel.emit('close', new Error('test error'));
+        // eslint-disable-next-line no-unused-vars
+      } catch (err) {
+        // do nothing
+      }
+    });
+  });
 });

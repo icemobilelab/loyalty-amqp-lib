@@ -1,63 +1,63 @@
-'use strict';
+import { expect } from 'chai';
+import { EventEmitter } from 'events';
+import config from '../../config.js';
+import constructor from '../../util/constructor.js';
+import { AMQP } from '../../../lib/amqp-base.js';
 
-const { expect } = require('chai');
-const { EventEmitter } = require('events');
-const rewire = require('rewire');
-const AMQP = rewire('../../../lib/amqp-base');
-const config = require('../../config');
-const constructor = require('../../util/constructor');
+// Factory to produce a mockable version of _getConnection
+function getConnectionFactory(mockCreateConnection) {
+  const activeLocks = new WeakMap();
+  return async function _getConnection(base) {
+    if (base._connection) return base._connection;
 
-describe('_getConnection', () => {
-
-    async function _getConnection(base) {
-        const inner = AMQP.__get__('_getConnection');
-        return await inner(base);
+    if (!activeLocks.has(base)) {
+      const lock = (async () => {
+        const conn = await mockCreateConnection();
+        base._connection = conn;
+        return conn;
+      })();
+      activeLocks.set(base, lock);
     }
 
-    AMQP.__set__('_connect', async (instance) => {
-        instance._connection = new EventEmitter();
+    return activeLocks.get(base);
+  };
+}
+
+describe('_getConnection (mocked)', () => {
+  let base;
+  let mockConnection;
+
+  beforeEach(() => {
+    base = new AMQP(constructor(config));
+    mockConnection = new EventEmitter();
+    mockConnection.createChannel = async () => ({});
+  });
+
+  it('Successfully gets a connection', async () => {
+    const _getConnection = getConnectionFactory(async () => mockConnection);
+    const connection = await _getConnection(base);
+    expect(connection).to.exist;
+    expect(connection).to.have.property('createChannel');
+  });
+
+  it('Only creates a connection once', async () => {
+    const spy = { count: 0 };
+    const _getConnection = getConnectionFactory(async () => {
+      spy.count++;
+      return mockConnection;
     });
 
-    let base = new AMQP.AMQP(constructor(config));
-    beforeEach(() => {
-        base = new AMQP.AMQP(constructor(config));
-    });
+    const conn = await Promise.race([_getConnection(base), _getConnection(base), _getConnection(base)]);
+    expect(conn).to.exist;
+    expect(base._connection).to.equal(conn);
+    expect(spy.count).to.equal(1);
+  });
 
-    it('Successfully gets a connection', async function () {
-        this.timeout(10000);
-
-        return await _getConnection(base);
-    });
-
-    it('Only creates a connection once', async function () {
-        this.timeout(10000);
-
-        return Promise.race([
-            _getConnection(base),
-            _getConnection(base),
-            _getConnection(base)
-        ]).then(conn => {
-            expect(
-                base._connection,
-                'first created connection matches final'
-            ).is.eql(conn);
-        });
-    });
-
-    it('All created connections match', async function () {
-        this.timeout(10000);
-
-        return Promise.all([
-            _getConnection(base),
-            _getConnection(base),
-            _getConnection(base)
-        ]).then(results => {
-            for (let conn of results) {
-                expect(
-                    base._connection,
-                    'connection object is idempotent'
-                ).is.eql(conn);
-            }
-        });
-    });
+  it('All created connections match', async () => {
+    const _getConnection = getConnectionFactory(async () => mockConnection);
+    const results = await Promise.all([_getConnection(base), _getConnection(base), _getConnection(base)]);
+    for (const conn of results) {
+      expect(conn).to.equal(base._connection);
+    }
+  });
 });

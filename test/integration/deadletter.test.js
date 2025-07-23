@@ -1,58 +1,69 @@
-'use strict';
+import { expect } from 'chai';
+import { v4 as uuidv4 } from 'uuid';
 
-const { expect } = require('chai');
-const rewire = require('rewire');
-const { AMQPConsumer, AMQPPublisher } = rewire('../../index');
-const AMQP = rewire('../../lib/amqp-base');
-const queueOptions = require('../util/constructor');
+import { AMQPConsumer, AMQPPublisher } from '../../index.js';
+import { _getChannel } from '../../lib/amqp-base.js';
+import queueOptions from '../util/constructor.js';
 
-describe('Dead letter queue', () => {
+describe('Dead Letter Queue (DLQ)', () => {
+  let consumer, producer, dlqConsumer;
+  let config;
+  const testId = `deadletter-${uuidv4()}`;
 
-    let _getChannel = AMQP.__get__('_getChannel');
-    let consumer, producer, config;
-    let testNum = 0;
+  beforeEach(() => {
+    config = queueOptions(testId);
+    consumer = new AMQPConsumer(config);
+    producer = new AMQPPublisher(config);
+  });
 
-    beforeEach(() => {
-        config = queueOptions(`deadletter-${++testNum}`);
-        consumer = new AMQPConsumer(config);
-        producer = new AMQPPublisher(config);
-    });
+  afterEach(async () => {
+    if (consumer) {
+      consumer.removeAllListeners();
+      await consumer.stop();
+    }
+    if (dlqConsumer) {
+      dlqConsumer.removeAllListeners();
+      await dlqConsumer.stop();
+    }
+  });
 
-    afterEach(() => {
-        if (consumer) {
-            consumer.removeAllListeners();
-            consumer.stop();
+  it('Sends non-acknowledged messages to the dead letter queue', async function () {
+    this.timeout(10000);
+
+    const deadLetterQueueName = `${config.deadLetterExchange}.queue`;
+    const dlqOptions = {
+      ...config,
+      queue: deadLetterQueueName,
+      isDeadLetterConsumer: true,
+      serviceName: `${testId}-dlq`,
+    };
+
+    const testMessage = 'Dead pigeon';
+
+    dlqConsumer = new AMQPConsumer(dlqOptions);
+    await dlqConsumer.listen();
+    await consumer.listen();
+
+    await new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => reject(new Error('Test timed out')), 8000);
+
+      dlqConsumer.once('message', (receivedMsg) => {
+        try {
+          expect(receivedMsg).to.be.a('string').and.equal(testMessage);
+          clearTimeout(timeout);
+          resolve();
+        } catch (err) {
+          clearTimeout(timeout);
+          reject(err);
         }
+      });
+
+      consumer.once('message', async (_msg, data) => {
+        const channel = await _getChannel(consumer);
+        channel.nack(data, false, false); // force dead-lettering
+      });
+
+      producer.publish(testMessage);
     });
-
-
-    it('Sends nonacknowledged messages to the dead letter queue', async function () {
-        this.timeout(0);
-
-        // have queue publish to listener. listener nacks -> msg goes to dlq
-        await new Promise(async (resolve) => {
-
-            const dlq = new AMQPConsumer({ ...config, ...{ queue: 'dlq' } });
-            await dlq.listen();
-            await consumer.listen();
-
-            const msg = 'Dead pigeon';
-
-            consumer.on('message', async (messageString, data) => {
-                const channel = await _getChannel(consumer);
-                channel.nack(data, false, false);
-            });
-
-            dlq.on('message', (messageString) => {
-                expect(messageString).to.be.a('string').and.eql(msg);
-                dlq.stop();
-                resolve();
-            });
-
-            producer.publish(msg);
-        });
-
-
-
-    });
+  });
 });
