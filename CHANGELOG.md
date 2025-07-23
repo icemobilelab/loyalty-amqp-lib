@@ -10,6 +10,10 @@ The versioning rules are described on http://semver.org/
 
 ## Loyalty AMQP Library Changelog
 
+### 3.0.0
+* migrated to a module type
+* migrate queue to quorum type
+
 ### 2.1.0
 * Brought back the `.queue` suffix for dead letter queues, as it existed in the old commons amqp library
 

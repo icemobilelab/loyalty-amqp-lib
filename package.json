@@ -25,7 +25,10 @@
     "prettier": "prettier --check \"**/*.{js,mjs,json}\"",
     "prettier:fix": "prettier --write \"**/*.{js,mjs,json}\""
   },
-  "repository": {
+    "publishConfig": {
+        "registry": "https://npm.pkg.github.com/"
+    },
+    "repository": {
     "type": "git",
     "url": "git+https://github.com/icemobilelab/loyalty-amqp-lib.git"
   },
