@@ -34,7 +34,7 @@ jobs:
                   git config --global --add \
                     url."https://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@github.com/".insteadOf "git://github.com/"
                   git config --global --get-regexp '^url\..*insteadOf'
-                  git ls-remote https://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@github.com/icemobilelab/mini-games-service-br.git
+                  git ls-remote https://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@github.com/icemobilelab/loyalty-commons-v4.git
                   git ls-remote ssh://git@github.com/icemobilelab/loyalty-commons-v4.git
                   npm ci
               env:
