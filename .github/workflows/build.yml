@@ -25,7 +25,7 @@ jobs:
 
             - name: Force HTTPS for GitHub deps and install dependencies
               run: |
-                  git config --global url."https://${{ secrets.GH_PAT }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+                  git config --global url."https://${{ secrets.GH_PAT }}:x-oauth-basic@github.com/".insteadOf "ssh://git@github.com/"
               env:
                   GH_PAT: ${{ secrets.GH_PAT }}
 
