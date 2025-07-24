@@ -22,10 +22,9 @@ jobs:
                   registry-url: 'https://npm.pkg.github.com'
                   scope: '@icemobile'
 
-            - name: Configure Git and Install Dependencies
+            - name: Git auth + Install dependencies
               run: |
-                  git config --global url."https://${{ secrets.GH_PAT }}:x-oauth-basic@github.com/".insteadOf "git@github.com:"
-                  git config --global url."https://${{ secrets.GH_PAT }}:x-oauth-basic@github.com/".insteadOf "ssh://git@github.com/"
+                  git config --global url."https://${{ secrets.GH_PAT }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
                   npm ci
 
             - name: Run tests
