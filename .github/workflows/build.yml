@@ -25,7 +25,7 @@ jobs:
 
             - name: Force HTTPS for GitHub deps and install dependencies
               run: |
-                  git config --global url."https://${{ secrets.GH_PAT }}:x-oauth-basic@github.com/".insteadOf "ssh://git@github.com/"
+                  git config --global url."https://${GH_PAT}:x-oauth-basic@github.com/".insteadOf "ssh://git@github.com/"
                   git config --global --get-regexp '^url\..*insteadOf'
                   git ls-remote ssh://git@github.com/icemobilelab/loyalty-commons-v4.git
                   npm ci
