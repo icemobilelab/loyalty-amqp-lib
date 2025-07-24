@@ -34,26 +34,15 @@ jobs:
               env:
                 GH_PAT: ${{ secrets.GH_PAT }}
 
-            - name: Rewrite SSH/git → HTTPS with PAT as password
-              env:
-                GH_PAT: ${{ secrets.GH_PAT }}
-              run: |
-                git config --global --add \
-                  url."https://x-access-token:${GH_PAT}@github.com/".insteadOf "git@github.com:"
-                git config --global --add \
-                  url."https://x-access-token:${GH_PAT}@github.com/".insteadOf "ssh://git@github.com/"
-                git config --global --add \
-                  url."https://x-access-token:${GH_PAT}@github.com/".insteadOf "git+ssh://git@github.com/"
-                git config --global --add \
-                  url."https://x-access-token:${GH_PAT}@github.com/".insteadOf "git://github.com/"
-
             - name: 🔍 Verify rewrites & connection
               env:
                 GH_PAT: ${{ secrets.GH_PAT }}
               run: |
-                git config --global --get-regexp '^url\..*insteadOf'
+                echo "Netrc contents:"
+                sed -n '1,3p' ~/.netrc
+                echo
                 GIT_TRACE=1 GIT_CURL_VERBOSE=1 \
-                git ls-remote git@github.com:icemobilelab/loyalty-commons-v4.git
+                git ls-remote https://github.com/icemobilelab/loyalty-commons-v4.git
 
 
             - name: Install deps
