@@ -26,13 +26,9 @@ jobs:
             - name: Force HTTPS for GitHub deps and install dependencies
               run: |
                   git config --global url."https://${{ secrets.GH_PAT }}:x-oauth-basic@github.com/".insteadOf "ssh://git@github.com/"
+                  npm ci
               env:
                   GH_PAT: ${{ secrets.GH_PAT }}
-
-            - name: Install
-              run: npm ci
-              env:
-                GH_PAT: ${{ secrets.GH_PAT }}
 
             - name: Run tests
               run: npm test
