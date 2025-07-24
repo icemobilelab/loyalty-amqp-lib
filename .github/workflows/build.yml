@@ -29,6 +29,9 @@ jobs:
                   npm ci
               env:
                   GH_PAT: ${{ secrets.GH_PAT }}
+                  NPM_CONFIG_LOGLEVEL: verbose
+                  GIT_TRACE: 1
+                  GIT_CURL_VERBOSE: 1
 
             - name: Run tests
               run: npm test
