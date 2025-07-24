@@ -22,14 +22,11 @@ jobs:
                   registry-url: 'https://npm.pkg.github.com'
                   scope: '@icemobile'
 
-            - name: Rewrite SSH git URLs to use HTTPS with token
+            - name: Configure Git and Install Dependencies
               run: |
-                git config --global url."https://${{ secrets.GH_PAT }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GH_PAT }}
-
-            - name: Install dependencies
-              run: npm ci
+                  git config --global url."https://${{ secrets.GH_PAT }}:x-oauth-basic@github.com/".insteadOf "git@github.com:"
+                  git config --global url."https://${{ secrets.GH_PAT }}:x-oauth-basic@github.com/".insteadOf "ssh://git@github.com/"
+                  npm ci
 
             - name: Run tests
               run: npm test
