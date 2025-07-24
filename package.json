@@ -62,7 +62,7 @@
     "got": "^14.4.5",
     "husky": "^8.0.1",
     "jsdoc": "^4.0.4",
-    "loyalty-commons-v4": "git+https://github.com/icemobilelab/loyalty-commons-v4.git#develop",
+    "loyalty-commons-v4": "github:icemobilelab/loyalty-commons-v4#develop",
     "mocha": "^10.0.0",
     "mochawesome": "^7.0.1",
     "nyc": "^15.1.0",
