@@ -23,32 +23,13 @@ jobs:
                   registry-url: 'https://npm.pkg.github.com'
                   scope: '@icemobile'
 
-            - name: Configure ~/.netrc for GitHub auth
-              run: |
-                cat <<EOF >> ~/.netrc
-                machine github.com
-                  login x-access-token
-                  password $GH_PAT
-                EOF
-                chmod 600 ~/.netrc
-              env:
-                GH_PAT: ${{ secrets.GH_PAT }}
-
-            - name: 🔍 Verify rewrites & connection
-              env:
-                GH_PAT: ${{ secrets.GH_PAT }}
-              run: |
-                echo "Netrc contents:"
-                sed -n '1,3p' ~/.netrc
-                echo
-                GIT_TRACE=1 GIT_CURL_VERBOSE=1 \
-                git ls-remote https://github.com/icemobilelab/loyalty-commons-v4.git
-
+            - name: Start ssh-agent
+              uses: webfactory/ssh-agent@v0.5.4
+              with:
+                ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
             - name: Install deps
               run: npm ci
-              env:
-                NODE_AUTH_TOKEN: ${{ secrets.GH_PAT }}
 
             - name: Run tests
               run: npm test
