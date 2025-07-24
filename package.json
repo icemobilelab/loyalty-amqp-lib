@@ -1,5 +1,5 @@
 {
-  "name": "@icemobile/loyalty-amqp-lib",
+  "name": "@icemobilelab/loyalty-amqp-lib",
   "version": "3.0.0",
   "type": "module",
   "description": "Common library for connecting to RabbitMQ",
