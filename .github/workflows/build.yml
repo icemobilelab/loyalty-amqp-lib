@@ -29,9 +29,14 @@ jobs:
                   git config --global url."https://${{ secrets.GH_PAT }}@github.com/".insteadOf "ssh://git@github.com/"
                   git config --global url."https://${{ secrets.GH_PAT }}@github.com/".insteadOf "git://github.com/"
                   git config --global url."https://${{ secrets.GH_PAT }}@github.com/".insteadOf "git+ssh://git@github.com/"
-                  npm ci
+                  git config --global --get-regexp '^url.*insteadOf' 
               env:
                   GH_PAT: ${{ secrets.GH_PAT }}
+
+            - name: Install
+              run: npm ci
+              env:
+                GH_PAT: ${{ secrets.GH_PAT }}
 
             - name: Run tests
               run: npm test
@@ -40,4 +45,4 @@ jobs:
               if: success()
               run: npm publish
               env:
-                  NODE_AUTH_TOKEN: ${{ secrets.GH_PAT }}
+                NODE_AUTH_TOKEN: ${{ secrets.GH_PAT }}
