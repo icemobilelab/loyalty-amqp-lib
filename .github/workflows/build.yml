@@ -24,8 +24,6 @@ jobs:
 
             - name: Install dependencies
               run: |
-                  echo "//npm.pkg.github.com/:_authToken=${{ secrets.GH_PAT }}" >> ~/.npmrc
-                  echo "@icemobile:registry=https://npm.pkg.github.com" >> ~/.npmrc
                   git config --global url."https://${{ secrets.GH_PAT }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
                   git config --global url."https://${{ secrets.GH_PAT }}:x-oauth-basic@github.com/".insteadOf "ssh://git@github.com/"
                   git config --global url."https://${{ secrets.GH_PAT }}:x-oauth-basic@github.com/".insteadOf "git@github.com:"
