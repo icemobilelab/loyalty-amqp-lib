@@ -22,15 +22,13 @@ jobs:
                   registry-url: 'https://npm.pkg.github.com'
                   scope: '@icemobile'
 
-            - name: Install dependencies
+            - name: Force HTTPS for GitHub deps and install dependencies
               run: |
-                  git config --global url."https://${{ secrets.GH_PAT }}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
-                  git config --global url."https://${{ secrets.GH_PAT }}:x-oauth-basic@github.com/".insteadOf "ssh://git@github.com/"
-                  git config --global url."https://${{ secrets.GH_PAT }}:x-oauth-basic@github.com/".insteadOf "git@github.com:"
-                  rm package-lock.json
-                  npm install
+                  git config --global url."https://${GH_PAT}:x-oauth-basic@github.com/".insteadOf "git@github.com:"
+                  git config --global url."https://${GH_PAT}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+                  npm ci
               env:
-                  NPM_TOKEN: ${{ secrets.GH_PAT }}
+                  GH_PAT: ${{ secrets.GH_PAT }}
 
             - name: Run tests
               run: npm test
