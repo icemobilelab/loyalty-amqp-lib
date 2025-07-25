@@ -8,9 +8,7 @@ jobs:
     build-and-publish:
         runs-on: ubuntu-latest
         permissions:
-            id-token: write
             contents: read
-            packages: write
 
         steps:
             - name: Checkout
@@ -20,8 +18,7 @@ jobs:
               uses: actions/setup-node@v4
               with:
                   node-version: '22'
-                  registry-url: 'https://npm.pkg.github.com'
-                  scope: '@icemobilelab'
+                  registry-url: 'https://registry.npmjs.org'
 
             - name: Start ssh-agent
               uses: webfactory/ssh-agent@v0.5.4
@@ -34,8 +31,6 @@ jobs:
             - name: Run tests
               run: npm test
 
-            - name: Publish to GitHub Packages
+            - name: Publish to npmjs.org
               if: success()
               run: npm publish
-              env:
-                NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
