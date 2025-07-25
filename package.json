@@ -1,6 +1,6 @@
 {
   "name": "@icemobilelab/loyalty-amqp-lib",
-  "version": "3.0.2",
+  "version": "3.0.1",
   "type": "module",
   "description": "Common library for connecting to RabbitMQ",
   "main": "index.js",
@@ -25,10 +25,10 @@
     "prettier": "prettier --check \"**/*.{js,mjs,json}\"",
     "prettier:fix": "prettier --write \"**/*.{js,mjs,json}\""
   },
-    "publishConfig": {
-        "registry": "https://npm.pkg.github.com/"
-    },
-    "repository": {
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
     "type": "git",
     "url": "git+https://github.com/icemobilelab/loyalty-amqp-lib.git"
   },
