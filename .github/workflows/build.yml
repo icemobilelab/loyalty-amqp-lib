@@ -44,10 +44,14 @@ jobs:
 
             - name: Authenticate for publish
               run: |
-                  echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
+                  echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > $NPM_CONFIG_USERCONFIG
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+                  NPM_CONFIG_USERCONFIG: /home/runner/.npmrc
 
             - name: Publish to npm
               if: success()
               run: npm publish --access=restricted
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+                  NPM_CONFIG_USERCONFIG: /home/runner/.npmrc
