@@ -51,7 +51,6 @@ jobs:
 
             - name: Publish to npm
               if: success()
-              run: npm publish --access=restricted
-              env:
-                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-                  NPM_CONFIG_USERCONFIG: /home/runner/.npmrc
+              run:
+                  npm config set //registry.npmjs.org/:_authToken=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
+                  npm publish --access=restricted
