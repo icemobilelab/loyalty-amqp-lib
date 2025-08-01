@@ -7,10 +7,6 @@
   "engines": {
     "node": ">=22.0.0"
   },
-  "publishConfig": {
-    "access": "restricted",
-    "registry": "https://registry.npmjs.org/"
-  },
   "scripts": {
     "start": "node .",
     "integration-test": "nyc mocha --timeout 10000 -r test/util/pretest.js --exit 'test/integration/**/*.test.js' --reporter mochawesome",
