@@ -30,17 +30,24 @@ jobs:
                   ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
             - name: Debug npm auth
-              run: |
-                  npm whoami || echo "Failed auth"
+              run: npm whoami || echo "Failed auth"
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
             - name: Install dependencies
               run: npm ci
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
             - name: Run tests
               run: npm test
 
+            - name: Authenticate for publish
+              run: |
+                  echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
             - name: Publish to npm
               if: success()
               run: npm publish --access=restricted
-              env:
-                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
