@@ -52,5 +52,5 @@ jobs:
             - name: Publish to npm
               if: success()
               run: |
-                  npm config set //registry.npmjs.org/:_authToken=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
+                  npm config set //registry.npmjs.org/:_authToken=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
                   npm publish --access=restricted
