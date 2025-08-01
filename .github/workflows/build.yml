@@ -41,6 +41,6 @@ jobs:
 
             - name: Publish to npm
               if: success()
-              run: npm publish
+              run: npm publish --access=restricted
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
