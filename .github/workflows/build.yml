@@ -26,13 +26,7 @@ jobs:
               with:
                   ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-            - name: Configure .npmrc for npmjs.org
-              run: |
-                  echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-              env:
-                  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-            - name: Install deps
+            - name: Install dependencies
               run: npm ci
 
             - name: Run tests
